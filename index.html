@@ -38,8 +38,8 @@
                         <img id="albumArt" src="https://cdn-icons-png.flaticon.com/512/3844/3844724.png" alt="Pochette">
                     </div>
                     <div class="track-info">
-                        <h5 id="trackTitle" class="mb-1 text-truncate px-3">Prêt à jouer</h5>
-                        <p id="trackArtist" class="small">Sélectionnez un fichier</p>
+                        <h5 id="trackTitle" class="mb-1 text-truncate px-3 text-contrast">Prêt à jouer</h5>
+                        <p id="trackArtist" class="small text-muted-contrast">Sélectionnez un fichier</p>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@
 
                 <div class="progress-zone mb-3 px-2">
                     <input type="range" id="progressSlider" class="form-range seek-bar" min="0" max="100" value="0">
-                    <div class="d-flex justify-content-between mt-1 small fw-bold">
+                    <div class="d-flex justify-content-between mt-1 small fw-bold text-contrast">
                         <span id="currentTime">0:00</span>
                         <span id="durationTime">0:00</span>
                     </div>
@@ -79,8 +79,14 @@
 
         <div class="col-12 col-lg-4">
             <div class="card p-3 shadow-lg border-0 h-100">
-                <h6 class="fw-bold mb-3"><i class="bi bi-music-note-list me-2"></i> Playlist</h6>
-                <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 400px;"></div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-music-note-list me-2"></i> Playlist</h6>
+                    <button id="clearPlaylistBtn" class="btn btn-outline-danger btn-xs py-0 px-2" style="font-size: 0.75rem;">
+                        <i class="bi bi-trash3 me-1"></i><span id="ui-clear">Vider</span>
+                    </button>
+                </div>
+                <div id="playlistContainer" class="list-group list-group-flush overflow-auto custom-scrollbar" style="max-height: 450px;">
+                    </div>
             </div>
         </div>
     </div>

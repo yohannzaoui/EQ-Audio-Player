@@ -1,16 +1,18 @@
 const translations = {
-    fr: { title: "Lecteur Audio EQ", chooseFile: "Charger", unknown: "Artiste inconnu" },
-    en: { title: "EQ Audio Player", chooseFile: "Load", unknown: "Unknown Artist" }
+    fr: { title: "Lecteur Audio EQ", chooseFile: "Charger", unknown: "Artiste inconnu", clear: "Vider", confirmClear: "Vider la playlist ?" },
+    en: { title: "EQ Audio Player", chooseFile: "Load", unknown: "Unknown Artist", clear: "Clear", confirmClear: "Clear playlist?" }
 };
 
 const audioEl = document.getElementById('audioSource');
 const playIcon = document.getElementById('playIcon');
 const volSlider = document.getElementById('volSlider');
 const progSlider = document.getElementById('progressSlider');
+const playlistContainer = document.getElementById('playlistContainer');
 
 let audioCtx, source, filters = [];
 let playlist = [], currentTrackIndex = -1;
 
+// Chargement des préférences
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let savedGains = JSON.parse(localStorage.getItem('eq-gains') || '[0,0,0,0,0]');
@@ -19,12 +21,16 @@ function updateUI() {
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
     document.getElementById('langSelect').value = lang;
-    document.getElementById('ui-title').innerText = translations[lang].title;
-    document.getElementById('ui-btn-label').innerText = translations[lang].chooseFile;
+    
+    const t = translations[lang];
+    document.getElementById('ui-title').innerText = t.title;
+    document.getElementById('ui-btn-label').innerText = t.chooseFile;
+    document.getElementById('ui-clear').innerText = t.clear;
 
     savedGains.forEach((g, i) => {
         document.getElementById(`db${i}`).innerText = g + 'dB';
-        document.querySelector(`input[data-index="${i}"]`).value = g;
+        const slider = document.querySelector(`input[data-index="${i}"]`);
+        if(slider) slider.value = g;
         if(filters[i]) filters[i].gain.value = g;
     });
 }
@@ -50,19 +56,23 @@ function loadTrack(index) {
 
     const file = playlist[index];
     audioEl.src = URL.createObjectURL(file);
-    audioEl.load(); // Indispensable pour iOS
-    audioEl.play().then(() => playIcon.className = "bi bi-pause-fill");
+    audioEl.load(); 
+    audioEl.play().then(() => playIcon.className = "bi bi-pause-fill").catch(e => console.log("Interaction requise"));
 
     document.getElementById('trackTitle').innerText = file.name;
+    document.getElementById('trackArtist').innerText = translations[lang].unknown;
+
     jsmediatags.read(file, {
         onSuccess: (tag) => {
             const { title, artist, picture } = tag.tags;
             if(title) document.getElementById('trackTitle').innerText = title;
-            document.getElementById('trackArtist').innerText = artist || translations[lang].unknown;
+            if(artist) document.getElementById('trackArtist').innerText = artist;
             if (picture) {
                 let base64 = "";
                 for (let i = 0; i < picture.data.length; i++) base64 += String.fromCharCode(picture.data[i]);
                 document.getElementById('albumArt').src = `data:${picture.format};base64,${window.btoa(base64)}`;
+            } else {
+                document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
             }
         }
     });
@@ -70,22 +80,45 @@ function loadTrack(index) {
 }
 
 function renderPlaylist() {
-    const container = document.getElementById('playlistContainer');
-    container.innerHTML = playlist.map((f, i) => 
-        `<button class="list-group-item list-group-item-action small ${i===currentTrackIndex?'active':''}" onclick="loadTrack(${i})">${f.name}</button>`
-    ).join('');
+    playlistContainer.innerHTML = "";
+    playlist.forEach((file, i) => {
+        const btn = document.createElement('button');
+        btn.className = `list-group-item list-group-item-action playlist-item ${i === currentTrackIndex ? 'active' : ''}`;
+        btn.innerHTML = `<i class="bi bi-music-note me-2"></i> ${file.name}`;
+        btn.onclick = () => loadTrack(i);
+        playlistContainer.appendChild(btn);
+    });
 }
 
+// Actions
 document.getElementById('fileInput').onchange = (e) => {
-    playlist = [...playlist, ...e.target.files];
+    const newFiles = Array.from(e.target.files);
+    playlist = [...playlist, ...newFiles];
     renderPlaylist();
     if(currentTrackIndex === -1) loadTrack(0);
 };
 
+document.getElementById('clearPlaylistBtn').onclick = () => {
+    if(playlist.length > 0 && confirm(translations[lang].confirmClear)) {
+        playlist = [];
+        currentTrackIndex = -1;
+        audioEl.pause();
+        audioEl.src = "";
+        document.getElementById('trackTitle').innerText = "Prêt à jouer";
+        document.getElementById('trackArtist').innerText = "Playlist vide";
+        document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+        renderPlaylist();
+    }
+};
+
 document.getElementById('playBtn').onclick = () => {
+    if(!audioEl.src) return;
     if(audioEl.paused) { audioEl.play(); playIcon.className = "bi bi-pause-fill"; }
     else { audioEl.pause(); playIcon.className = "bi bi-play-fill"; }
 };
+
+document.getElementById('nextBtn').onclick = () => loadTrack(currentTrackIndex + 1);
+document.getElementById('prevBtn').onclick = () => loadTrack(currentTrackIndex - 1);
 
 volSlider.oninput = (e) => audioEl.volume = e.target.value;
 
@@ -120,6 +153,7 @@ audioEl.ontimeupdate = () => {
 
 progSlider.oninput = () => audioEl.currentTime = (progSlider.value / 100) * audioEl.duration;
 
+// Fix iOS AudioContext
 ["click", "touchstart"].forEach(v => window.addEventListener(v, () => { if(audioCtx) audioCtx.resume(); }, {once:true}));
 
 updateUI();
