@@ -1,6 +1,6 @@
 const translations = {
     fr: { title: "Lecteur Audio EQ", chooseFile: "Charger", reset: "Réinitialiser EQ", export: "Exporter EQ", import: "Importer EQ", unknownArt: "Artiste inconnu", ready: "Prêt à jouer", selectFile: "Sélectionnez un fichier", clearPlaylist: "Vider", confirmClear: "Voulez-vous vraiment vider toute la playlist ?" },
-    en: { title: "EQ Audio Player", chooseFile: "Load", reset: "Reset EQ", export: "Export EQ", import: "Import EQ", unknownArt: "Unknown Artist", ready: "Ready to play", selectFile: "Select a file", clearPlaylist: "Clear", confirmClear: "Are you sure you want to clear the entire playlist?" }
+    en: { title: "EQ Audio Player", chooseFile: "Load", reset: "Reset EQ", export: "Export EQ", import: "Import EQ", unknownArt: "Unknown Artist", ready: "Ready to play", selectFile: "Select a file", clearPlaylist: "Clear", confirmClear: "Are you sure?" }
 };
 
 const audioEl = document.getElementById('audioSource');
@@ -13,43 +13,36 @@ let audioCtx, source, filters = [];
 let playlist = [];
 let currentTrackIndex = -1;
 
-// Sauvegarde automatique des préférences (Mémoire du navigateur)
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0; 
 let savedGains = JSON.parse(localStorage.getItem('eq-gains') || '[0,0,0,0,0]');
 let savedVol = parseFloat(localStorage.getItem('eq-volume')) || 0.7;
-let preMuteVol = savedVol > 0 ? savedVol : 0.7;
 
-function formatTime(s) { const m = Math.floor(s/60); const rs = Math.floor(s%60); return `${m}:${rs < 10 ? '0' + rs : rs}`; }
+function formatTime(s) { 
+    if (isNaN(s)) return "0:00";
+    const m = Math.floor(s/60); const rs = Math.floor(s%60); 
+    return `${m}:${rs < 10 ? '0' + rs : rs}`; 
+}
 
 function updateUI() {
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
     document.getElementById('langSelect').value = lang;
     
-    // Gestion Boucle
-    const loopBtn = document.getElementById('loopToggle');
     const loopIcon = document.getElementById('loopIcon');
-    loopBtn.classList.remove('btn-active-loop-all', 'btn-active-loop-one');
     audioEl.loop = (loopState === 2);
-    if (loopState === 1) { loopBtn.classList.add('btn-active-loop-all'); loopIcon.className = 'bi bi-repeat'; } 
-    else if (loopState === 2) { loopBtn.classList.add('btn-active-loop-one'); loopIcon.className = 'bi bi-repeat-1'; } 
-    else { loopIcon.className = 'bi bi-repeat'; }
+    loopIcon.className = loopState === 2 ? 'bi bi-repeat-1' : 'bi bi-repeat';
+    document.getElementById('loopToggle').style.color = loopState > 0 ? 'var(--accent)' : '';
 
-    // Volume
     audioEl.volume = savedVol;
     volSlider.value = savedVol;
     volValue.innerText = Math.round(savedVol * 100) + "%";
-    volIcon.className = savedVol == 0 ? "bi bi-volume-mute-fill text-danger" : (savedVol < 0.5 ? "bi bi-volume-down-fill" : "bi bi-volume-up-fill");
     
-    // Traductions
     const t = translations[lang];
     document.getElementById('ui-title').innerText = t.title;
     document.getElementById('ui-btn-label').innerText = t.chooseFile;
     document.getElementById('resetBtn').innerText = t.reset;
-    document.getElementById('exportBtn').innerText = t.export;
-    document.getElementById('ui-import-label').innerText = t.import;
     document.getElementById('ui-clear-playlist').innerText = t.clearPlaylist;
 
     if (currentTrackIndex === -1) {
@@ -57,7 +50,6 @@ function updateUI() {
         document.getElementById('trackArtist').innerText = t.selectFile;
     }
     
-    // Égaliseur
     savedGains.forEach((g, i) => {
         document.getElementById(`db${i}`).innerText = g + 'dB';
         const s = document.querySelector(`input[data-index="${i}"]`);
@@ -84,30 +76,39 @@ function loadTrack(index) {
     currentTrackIndex = index;
     const file = playlist[index];
     setupAudio();
-    audioEl.src = URL.createObjectURL(file);
-    audioEl.play();
-    playIcon.className = "bi bi-pause-fill";
+    
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const fileURL = URL.createObjectURL(file);
+    audioEl.src = fileURL;
+    audioEl.load(); // Primordial pour iOS
+    
+    audioEl.play().then(() => {
+        playIcon.className = "bi bi-pause-fill";
+    }).catch(e => console.log("Lecture en attente d'interaction"));
+
     renderPlaylist();
 
-    // Badge Format
+    // Extension & Badge
     const extension = file.name.split('.').pop().toLowerCase();
     const badge = document.getElementById('formatBadge');
     badge.innerText = extension.toUpperCase();
-    badge.className = 'badge ms-2 badge-format';
-    if (['mp3', 'wav', 'flac', 'ogg', 'm4a'].includes(extension)) badge.classList.add(`fmt-${extension}`);
-    else badge.classList.add('fmt-default');
+    badge.className = `badge ms-2 badge-format fmt-${['mp3','wav','flac','m4a'].includes(extension) ? extension : 'default'}`;
     badge.classList.remove('d-none');
 
-    // Métadonnées
+    // Tags
     jsmediatags.read(file, {
         onSuccess: (tag) => {
             const { title, artist, picture } = tag.tags;
             document.getElementById('trackTitle').innerText = title || file.name;
             document.getElementById('trackArtist').innerText = artist || translations[lang].unknownArt;
             if (picture) {
-                const base64 = picture.data.map(c => String.fromCharCode(c)).join("");
-                document.getElementById('albumArt').src = `data:${picture.format};base64,${window.btoa(base64)}`;
-            } else { document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png"; }
+                let base64String = "";
+                for (let i = 0; i < picture.data.length; i++) base64String += String.fromCharCode(picture.data[i]);
+                document.getElementById('albumArt').src = `data:${picture.format};base64,${window.btoa(base64String)}`;
+            } else {
+                document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+            }
         },
         onError: () => {
             document.getElementById('trackTitle').innerText = file.name;
@@ -129,30 +130,40 @@ function renderPlaylist() {
     });
 }
 
-// Actions Playlist
-document.getElementById('clearPlaylistBtn').onclick = () => {
-    if (playlist.length > 0 && confirm(translations[lang].confirmClear)) {
-        playlist = []; currentTrackIndex = -1; audioEl.src = "";
-        document.getElementById('formatBadge').classList.add('d-none');
-        document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
-        playIcon.className = "bi bi-play-fill"; updateUI(); renderPlaylist();
-    }
-};
-
+// Events
 document.getElementById('fileInput').onchange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) { playlist = [...playlist, ...files]; renderPlaylist(); if (currentTrackIndex === -1) loadTrack(0); }
 };
 
-// Contrôles Audio
-document.getElementById('prevBtn').onclick = () => { if (audioEl.currentTime > 3) audioEl.currentTime = 0; else if (currentTrackIndex > 0) loadTrack(currentTrackIndex - 1); };
-document.getElementById('nextBtn').onclick = () => { if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1); else if (loopState === 1) loadTrack(0); };
-audioEl.onended = () => { if (loopState === 2) audioEl.play(); else if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1); else if (loopState === 1) loadTrack(0); };
-volIcon.onclick = () => { if (savedVol > 0) { preMuteVol = savedVol; savedVol = 0; } else { savedVol = preMuteVol; } localStorage.setItem('eq-volume', savedVol); updateUI(); };
-playBtn.onclick = () => { if(!audioEl.src) return; if(audioEl.paused) { audioEl.play(); playIcon.className = "bi bi-pause-fill"; } else { audioEl.pause(); playIcon.className = "bi bi-play-fill"; } };
-volSlider.oninput = (e) => { savedVol = parseFloat(e.target.value); if (savedVol > 0) preMuteVol = savedVol; localStorage.setItem('eq-volume', savedVol); updateUI(); };
+document.getElementById('playBtn').onclick = () => {
+    if(!audioEl.src) return;
+    if(audioEl.paused) { audioEl.play(); playIcon.className = "bi bi-pause-fill"; }
+    else { audioEl.pause(); playIcon.className = "bi bi-play-fill"; }
+};
 
-// EQ Interactivité
+document.getElementById('nextBtn').onclick = () => { 
+    if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1); 
+    else if (loopState === 1) loadTrack(0);
+};
+
+document.getElementById('prevBtn').onclick = () => {
+    if (audioEl.currentTime > 3) audioEl.currentTime = 0;
+    else if (currentTrackIndex > 0) loadTrack(currentTrackIndex - 1);
+};
+
+audioEl.onended = () => {
+    if (loopState === 2) audioEl.play();
+    else document.getElementById('nextBtn').click();
+};
+
+volSlider.oninput = (e) => {
+    savedVol = parseFloat(e.target.value);
+    audioEl.volume = savedVol;
+    volValue.innerText = Math.round(savedVol * 100) + "%";
+    localStorage.setItem('eq-volume', savedVol);
+};
+
 document.querySelectorAll('input[type="range"].vertical').forEach(s => {
     s.oninput = (e) => {
         const i = e.target.dataset.index, v = parseInt(e.target.value);
@@ -162,41 +173,45 @@ document.querySelectorAll('input[type="range"].vertical').forEach(s => {
     };
 });
 
-// Préférences Système
-document.getElementById('themeToggle').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', theme); updateUI(); };
-document.getElementById('langSelect').onchange = (e) => { lang = e.target.value; localStorage.setItem('lang', lang); updateUI(); renderPlaylist(); };
-document.getElementById('loopToggle').onclick = () => { loopState = (loopState + 1) % 3; localStorage.setItem('eq-loop-state', loopState); updateUI(); };
-document.getElementById('resetBtn').onclick = () => { savedGains = [0,0,0,0,0]; localStorage.setItem('eq-gains', JSON.stringify(savedGains)); updateUI(); filters.forEach(f => f.gain.value = 0); };
-audioEl.ontimeupdate = () => { if(!isNaN(audioEl.duration)) { progSlider.value = (audioEl.currentTime / audioEl.duration) * 100; curTimeTxt.innerText = formatTime(audioEl.currentTime); durTimeTxt.innerText = formatTime(audioEl.duration); } };
+document.getElementById('themeToggle').onclick = () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', theme);
+    updateUI();
+};
+
+document.getElementById('langSelect').onchange = (e) => {
+    lang = e.target.value;
+    localStorage.setItem('lang', lang);
+    updateUI();
+};
+
+document.getElementById('loopToggle').onclick = () => {
+    loopState = (loopState + 1) % 3;
+    localStorage.setItem('eq-loop-state', loopState);
+    updateUI();
+};
+
+document.getElementById('resetBtn').onclick = () => {
+    savedGains = [0,0,0,0,0];
+    localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+    updateUI();
+};
+
+audioEl.ontimeupdate = () => {
+    if(!isNaN(audioEl.duration)) {
+        progSlider.value = (audioEl.currentTime / audioEl.duration) * 100;
+        curTimeTxt.innerText = formatTime(audioEl.currentTime);
+        durTimeTxt.innerText = formatTime(audioEl.duration);
+    }
+};
+
 progSlider.oninput = () => { audioEl.currentTime = (progSlider.value / 100) * audioEl.duration; };
 
-// Import/Export
-document.getElementById('exportBtn').onclick = () => {
-    const config = { gains: savedGains, theme: theme, lang: lang, volume: savedVol, loop: loopState };
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `eq-config.json`; a.click();
-};
-
-document.getElementById('importInput').onchange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const config = JSON.parse(event.target.result);
-            if (config.gains) savedGains = config.gains;
-            if (config.theme) theme = config.theme;
-            if (config.lang) lang = config.lang;
-            if (config.volume) savedVol = config.volume;
-            if (config.loop !== undefined) loopState = config.loop;
-            localStorage.setItem('eq-gains', JSON.stringify(savedGains));
-            localStorage.setItem('theme', theme); localStorage.setItem('lang', lang);
-            localStorage.setItem('eq-volume', savedVol); localStorage.setItem('eq-loop-state', loopState);
-            updateUI();
-        } catch (err) { alert("Erreur lecture."); }
-    };
-    reader.readAsText(file);
-};
+// Fix iOS AudioContext
+["click", "touchstart"].forEach(evt => 
+    window.addEventListener(evt, () => {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true })
+);
 
 updateUI();
-window.onclick = () => { if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); };
