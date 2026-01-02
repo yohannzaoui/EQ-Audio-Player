@@ -1,18 +1,161 @@
-:root { --bg: #121212; --card: #1e1e1e; --txt: #ffffff; --accent: #1abc9c; }
-[data-theme="light"] { --bg: #f8f9fa; --card: #ffffff; --txt: #212529; --accent: #3498db; }
+/* Variables de couleurs pour les thèmes */
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #ffffff;
+    --accent-color: #1abc9c; /* Turquoise */
+    --secondary-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
 
-body { background-color: var(--bg); color: var(--txt); transition: 0.3s; font-family: 'Segoe UI', system-ui, sans-serif; }
-.card { background-color: var(--card); color: var(--txt); border-radius: 20px; }
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+    --accent-color: #3498db; /* Bleu */
+    --secondary-bg: rgba(0, 0, 0, 0.05);
+    --border-color: rgba(0, 0, 0, 0.1);
+}
 
-.art-wrapper { width: 160px; height: 160px; border-radius: 20px; overflow: hidden; border: 3px solid var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-#albumArt { width: 100%; height: 100%; object-fit: cover; }
+/* Style Général */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+}
 
-.btn-accent-round { width: 55px; height: 55px; border-radius: 50%; background: var(--accent); color: white; border: none; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; }
-.btn-round { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+}
 
-.eq-grid { display: flex; justify-content: space-around; }
-.eq-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; }
-.vert-range { appearance: slider-vertical; width: 12px; height: 125px; cursor: pointer; }
-.db-txt { color: var(--accent); font-weight: bold; margin-bottom: 5px; }
+/* Pochette d'album */
+.art-wrapper {
+    width: 160px;
+    height: 160px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 4px solid var(--accent-color);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
 
-.playlist-item.active { background: var(--accent) !important; color: white !important; }
+#albumArt {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Contrôles de lecture */
+.btn-accent-round {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.btn-accent-round:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.btn-round {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Égaliseur (Sliders Verticaux) */
+.eq-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    background: var(--secondary-bg);
+    padding: 20px 10px;
+    border-radius: 15px;
+}
+
+.eq-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.vert-range {
+    appearance: slider-vertical;
+    width: 12px;
+    height: 150px;
+    cursor: pointer;
+    outline: none;
+}
+
+.db-txt {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    min-width: 35px;
+    text-align: center;
+}
+
+.eq-item span:last-child {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    font-weight: bold;
+}
+
+/* Playlist */
+.playlist-item {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+    font-size: 0.9rem;
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.playlist-item:hover {
+    background-color: var(--secondary-bg) !important;
+}
+
+.playlist-item.active {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    border-color: var(--accent-color) !important;
+    font-weight: bold;
+}
+
+/* Barre de progression et Volume */
+.form-range::-webkit-slider-runnable-track {
+    background-color: var(--secondary-bg);
+}
+
+.form-range::-webkit-slider-thumb {
+    background-color: var(--accent-color);
+}
+
+/* Adaptabilité mobile */
+@media (max-width: 576px) {
+    .vert-range {
+        height: 120px;
+    }
+    .art-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+}
