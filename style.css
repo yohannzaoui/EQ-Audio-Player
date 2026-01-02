@@ -1,19 +1,10 @@
 :root {
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --text-color: #ffffff;
-    --accent-color: #1abc9c;
-    --secondary-bg: rgba(255, 255, 255, 0.05);
-    --border-color: rgba(255, 255, 255, 0.1);
+    --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #ffffff;
+    --accent-color: #1abc9c; --secondary-bg: rgba(255, 255, 255, 0.05); --border-color: rgba(255, 255, 255, 0.1);
 }
-
 [data-theme="light"] {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #212529;
-    --accent-color: #3498db;
-    --secondary-bg: rgba(0, 0, 0, 0.05);
-    --border-color: rgba(0, 0, 0, 0.1);
+    --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #212529;
+    --accent-color: #3498db; --secondary-bg: rgba(0, 0, 0, 0.05); --border-color: rgba(0, 0, 0, 0.1);
 }
 
 body { background-color: var(--bg-color); color: var(--text-color); transition: 0.3s; min-height: 100vh; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -30,5 +21,6 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
 .vert-range { appearance: slider-vertical; width: 12px; height: 150px; cursor: pointer; }
 .db-txt { font-size: 0.75rem; color: var(--accent-color); font-weight: bold; }
 
-.playlist-item { background: transparent !important; color: var(--text-color) !important; border-color: var(--border-color) !important; cursor: pointer; border-radius: 8px !important; margin-bottom: 5px; }
-.playlist-item.active { background: var(--accent-color) !important; color: #fff !important; }
+.playlist-item { background: transparent !important; color: var(--text-color) !important; border-color: var(--border-color) !important; cursor: pointer; border-radius: 8px !important; margin-bottom: 5px; transition: 0.2s; }
+.playlist-item:hover { background: var(--secondary-bg) !important; }
+.playlist-item.active { background: var(--accent-color) !important; color: #fff !important; font-weight: bold; }
