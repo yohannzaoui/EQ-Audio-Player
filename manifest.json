@@ -1,0 +1,16 @@
+{
+  "name": "EQ Audio Player",
+  "short_name": "EQ Player",
+  "description": "Lecteur audio haute fidélité avec égaliseur 5 bandes",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#1abc9c",
+  "icons": [
+    {
+      "src": "img/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
