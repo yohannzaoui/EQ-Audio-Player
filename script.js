@@ -1,6 +1,6 @@
 const translations = {
-    fr: { title: "EQ Audio Player", choose: "Charger", reset: "Réinitialiser EQ", import: "Import EQ", export: "Export EQ", playlist: "Playlist", clear: "Vider", confirmClear: "Vider la playlist ?", ready: "Prêt à jouer", unknown: "Artiste inconnu" },
-    en: { title: "EQ Audio Player", choose: "Load", reset: "Reset EQ", import: "Import EQ", export: "Export EQ", playlist: "Playlist", clear: "Clear", confirmClear: "Clear playlist?", ready: "Ready to play", unknown: "Unknown Artist" }
+    fr: { title: "EQ Audio Player", choose: "Charger", reset: "Réinitialiser EQ", import: "Import EQ", export: "Export EQ", playlist: "Ma Playlist", clear: "Vider", confirmClear: "Vider la playlist ?", ready: "Prêt à jouer", unknown: "Artiste inconnu", theme: "Mode" },
+    en: { title: "EQ Audio Player", choose: "Load", reset: "Reset EQ", import: "Import EQ", export: "Export EQ", playlist: "Playlist", clear: "Clear", confirmClear: "Clear playlist?", ready: "Ready to play", unknown: "Unknown Artist", theme: "Mode" }
 };
 
 const audioEl = document.getElementById('audioSource');
@@ -8,7 +8,7 @@ const playIcon = document.getElementById('playIcon');
 let audioCtx, source, filters = [];
 let playlist = [], currentTrackIndex = -1;
 
-// Préférences sauvegardées
+// Préférences
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0;
@@ -26,6 +26,7 @@ function updateUI() {
     document.getElementById('ui-import-label').innerText = t.import;
     document.getElementById('exportBtn').innerText = t.export;
     document.getElementById('ui-playlist-title').innerText = t.playlist;
+    document.getElementById('ui-theme-text').innerText = t.theme;
 
     document.getElementById('loopIcon').className = loopState === 2 ? 'bi bi-repeat-1' : 'bi bi-repeat';
     document.getElementById('loopToggle').style.color = loopState > 0 ? 'var(--accent-color)' : '';
@@ -52,7 +53,7 @@ function initAudio() {
     lastNode.connect(audioCtx.destination);
 }
 
-// Actions
+// Actions Système
 document.getElementById('themeToggle').onclick = () => {
     theme = (theme === 'dark') ? 'light' : 'dark';
     localStorage.setItem('theme', theme); updateUI();
@@ -65,9 +66,12 @@ document.getElementById('langSelect').onchange = e => {
 
 document.getElementById('resetBtn').onclick = () => {
     savedGains = [0, 0, 0, 0, 0];
-    localStorage.setItem('eq-gains', JSON.stringify(savedGains)); updateUI();
+    localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+    filters.forEach((f, i) => { if(f) f.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01); });
+    updateUI();
 };
 
+// Export/Import
 document.getElementById('exportBtn').onclick = () => {
     const blob = new Blob([JSON.stringify({ gains: savedGains, theme, lang })], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'eq-config.json'; a.click();
@@ -88,7 +92,7 @@ document.getElementById('importInput').onchange = e => {
     reader.readAsText(e.target.files[0]);
 };
 
-// Lecture
+// Logique Player
 function loadTrack(index) {
     if (index < 0 || index >= playlist.length) return;
     currentTrackIndex = index;
@@ -120,6 +124,12 @@ document.getElementById('playBtn').onclick = () => {
 
 document.getElementById('nextBtn').onclick = () => loadTrack(currentTrackIndex + 1);
 document.getElementById('prevBtn').onclick = () => loadTrack(currentTrackIndex - 1);
+
+document.getElementById('clearPlaylistBtn').onclick = () => {
+    if(confirm(translations[lang].confirmClear)) {
+        playlist = []; currentTrackIndex = -1; audioEl.src = ""; renderPlaylist(); updateUI();
+    }
+};
 
 document.querySelectorAll('.vert-range').forEach(s => {
     s.oninput = e => {
