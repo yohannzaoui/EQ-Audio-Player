@@ -8,7 +8,6 @@ const playBtn = document.getElementById('playBtn');
 const playIcon = document.getElementById('playIcon');
 let audioCtx, source, filters = [], playlist = [], currentTrackIndex = -1, previousVolume = 0.7;
 
-// Récupération automatique des préférences sauvées
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0;
@@ -18,7 +17,6 @@ function updateUI() {
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
     document.getElementById('langSelect').value = lang;
-    
     const t = translations[lang];
     document.getElementById('ui-title').innerText = t.title;
     document.getElementById('ui-btn-label').innerText = t.choose;
@@ -32,14 +30,19 @@ function updateUI() {
     lIcon.className = loopState === 2 ? 'bi bi-repeat-1' : 'bi bi-repeat';
     lBtn.style.color = loopState > 0 ? 'var(--accent-color)' : 'inherit';
 
-    // Etat du bouton de lecture (Vert si actif, Gris si pause)
+    // Logique Bouton Play/Pause (Vert/Gris)
     if (audioEl.paused) {
         playIcon.className = "bi bi-play-fill";
-        playBtn.classList.replace('btn-play-active', 'btn-play-paused') || playBtn.classList.add('btn-play-paused');
+        playBtn.classList.remove('btn-play-active');
+        playBtn.classList.add('btn-play-paused');
     } else {
         playIcon.className = "bi bi-pause-fill";
-        playBtn.classList.replace('btn-play-paused', 'btn-play-active') || playBtn.classList.add('btn-play-active');
+        playBtn.classList.add('btn-play-active');
+        playBtn.classList.remove('btn-play-paused');
     }
+
+    const mIcon = document.getElementById('muteIcon');
+    mIcon.className = audioEl.volume === 0 ? "bi bi-volume-mute-fill text-danger" : "bi bi-volume-up-fill";
 
     savedGains.forEach((g, i) => {
         document.getElementById(`db${i}`).innerText = g + 'dB';
@@ -82,7 +85,7 @@ function loadTrack(index) {
                 if (artist) document.getElementById('trackArtist').innerText = artist;
                 if (album) document.getElementById('trackAlbum').innerText = album;
                 if (picture) {
-                    const base64 = window.btoa(picture.data.reduce((acc, byte) => acc + String.fromCharCode(byte), ""));
+                    const base64 = window.btoa(picture.data.reduce((acc, b) => acc + String.fromCharCode(b), ""));
                     document.getElementById('albumArt').src = `data:${picture.format};base64,${base64}`;
                 }
             }
@@ -101,26 +104,15 @@ function renderPlaylist() {
     ).join('');
 }
 
-// Volume & Mute
-const muteBtn = document.getElementById('muteBtn');
-const volSlider = document.getElementById('volSlider');
-muteBtn.onclick = () => {
-    if (audioEl.volume > 0) {
-        previousVolume = audioEl.volume;
-        audioEl.volume = 0; volSlider.value = 0;
-        muteBtn.className = "bi bi-volume-mute-fill text-danger";
-    } else {
-        audioEl.volume = previousVolume || 0.7;
-        volSlider.value = audioEl.volume;
-        muteBtn.className = "bi bi-volume-up-fill";
-    }
-};
-volSlider.oninput = e => {
-    audioEl.volume = e.target.value;
-    muteBtn.className = audioEl.volume == 0 ? "bi bi-volume-mute-fill text-danger" : "bi bi-volume-up-fill";
+document.getElementById('muteContainer').onclick = () => {
+    if (audioEl.volume > 0) { previousVolume = audioEl.volume; audioEl.volume = 0; }
+    else { audioEl.volume = previousVolume || 0.7; }
+    document.getElementById('volSlider').value = audioEl.volume;
+    updateUI();
 };
 
-// Sync events
+document.getElementById('volSlider').oninput = e => { audioEl.volume = e.target.value; updateUI(); };
+
 audioEl.onplay = () => updateUI();
 audioEl.onpause = () => updateUI();
 audioEl.onended = () => {
@@ -130,25 +122,14 @@ audioEl.onended = () => {
     else updateUI();
 };
 
-// Sauvegarde automatique des changements
-document.getElementById('themeToggle').onclick = () => { 
-    theme = (theme === 'dark' ? 'light' : 'dark'); 
-    localStorage.setItem('theme', theme); 
-    updateUI(); 
-};
-document.getElementById('langSelect').onchange = e => { 
-    lang = e.target.value; 
-    localStorage.setItem('lang', lang); 
-    updateUI(); 
-};
+document.getElementById('themeToggle').onclick = () => { theme = (theme === 'dark' ? 'light' : 'dark'); localStorage.setItem('theme', theme); updateUI(); };
+document.getElementById('langSelect').onchange = e => { lang = e.target.value; localStorage.setItem('lang', lang); updateUI(); };
 
-// Autres boutons
-document.getElementById('fileInput').onchange = e => { playlist = [...playlist, ...Array.from(e.target.files)]; renderPlaylist(); if (currentTrackIndex === -1) loadTrack(0); };
 playBtn.onclick = () => { if (!audioEl.src) return; audioEl.paused ? audioEl.play() : audioEl.pause(); };
+document.getElementById('fileInput').onchange = e => { playlist = [...playlist, ...Array.from(e.target.files)]; renderPlaylist(); if (currentTrackIndex === -1) loadTrack(0); };
 document.getElementById('nextBtn').onclick = () => { if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1); else if (loopState === 1) loadTrack(0); };
 document.getElementById('prevBtn').onclick = () => { if (currentTrackIndex > 0) loadTrack(currentTrackIndex - 1); };
 document.getElementById('loopToggle').onclick = () => { loopState = (loopState + 1) % 3; localStorage.setItem('eq-loop-state', loopState); updateUI(); };
-document.getElementById('clearPlaylistBtn').onclick = () => { if(confirm(translations[lang].confirmClear)) { playlist = []; currentTrackIndex = -1; audioEl.src = ""; renderPlaylist(); updateUI(); } };
 
 document.querySelectorAll('.vert-range').forEach(s => { 
     s.oninput = e => { 
@@ -165,6 +146,5 @@ audioEl.ontimeupdate = () => {
     document.getElementById('currentTime').innerText = fmt(audioEl.currentTime);
     document.getElementById('durationTime').innerText = fmt(audioEl.duration || 0);
 };
-document.getElementById('progressSlider').oninput = e => audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
 
 updateUI();
