@@ -1,14 +1,37 @@
 const translations = {
-    fr: { title: "Audio Master EQ", choose: "Charger", record: "Enregistrer", stop: "Arrêter", reset: "Reset EQ", confirm: "Vider la playlist ?" },
-    en: { title: "Audio Master EQ", choose: "Load", record: "Record", stop: "Stop", reset: "Reset EQ", confirm: "Clear playlist?" }
+    fr: {
+        title: "EQ Audio Player",
+        choose: "Charger",
+        reset: "Réinitialiser EQ",
+        import: "Importer JSON",
+        export: "Exporter JSON",
+        playlist: "Playlist",
+        clear: "Vider",
+        confirmClear: "Vider la playlist ?",
+        ready: "Prêt à jouer",
+        selectFile: "Sélectionnez un fichier",
+        unknownArtist: "Artiste inconnu"
+    },
+    en: {
+        title: "EQ Audio Player",
+        choose: "Load",
+        reset: "Reset EQ",
+        import: "Import JSON",
+        export: "Export JSON",
+        playlist: "Playlist",
+        clear: "Clear",
+        confirmClear: "Clear playlist?",
+        ready: "Ready to play",
+        selectFile: "Select a file",
+        unknownArtist: "Unknown Artist"
+    }
 };
 
 const audioEl = document.getElementById('audioSource');
 const playIcon = document.getElementById('playIcon');
-let audioCtx, source, filters = [], recorder, recordedChunks = [];
+let audioCtx, source, filters = [];
+let playlist = [], currentTrackIndex = -1;
 
-// État et Préférences
-let playlist = [], currentTrackIndex = -1, isRecording = false;
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0;
@@ -17,21 +40,29 @@ let savedGains = JSON.parse(localStorage.getItem('eq-gains') || '[0,0,0,0,0]');
 function updateUI() {
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-    document.getElementById('langSelect').value = lang;
     
     const t = translations[lang];
+    document.getElementById('langSelect').value = lang;
     document.getElementById('ui-title').innerText = t.title;
     document.getElementById('ui-btn-label').innerText = t.choose;
     document.getElementById('resetBtn').innerText = t.reset;
-    document.getElementById('ui-record').innerText = isRecording ? t.stop : t.record;
+    document.getElementById('ui-import-label').innerText = t.import;
+    document.getElementById('exportBtn').innerText = t.export;
+    document.getElementById('ui-playlist-title').innerText = t.playlist;
+    document.getElementById('ui-clear').innerText = t.clear;
+
+    if (currentTrackIndex === -1) {
+        document.getElementById('trackTitle').innerText = t.ready;
+        document.getElementById('trackArtist').innerText = t.selectFile;
+    }
 
     document.getElementById('loopIcon').className = loopState === 2 ? 'bi bi-repeat-1' : 'bi bi-repeat';
     document.getElementById('loopToggle').style.color = loopState > 0 ? 'var(--accent)' : '';
+    audioEl.loop = (loopState === 2);
 
     savedGains.forEach((g, i) => {
         document.getElementById(`db${i}`).innerText = g + 'dB';
-        const el = document.querySelector(`input[data-index="${i}"]`);
-        if(el) el.value = g;
+        document.querySelector(`input[data-index="${i}"]`).value = g;
         if(filters[i]) filters[i].gain.value = g;
     });
 }
@@ -47,29 +78,34 @@ function initAudio() {
         lastNode.connect(filter); lastNode = filter; filters.push(filter);
     });
     lastNode.connect(audioCtx.destination);
-    
-    // Setup Destination pour Record
-    const dest = audioCtx.createMediaStreamDestination();
-    lastNode.connect(dest);
-    recorder = new MediaRecorder(dest.stream);
-    recorder.ondataavailable = e => recordedChunks.push(e.data);
-    recorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'recording.webm'; a.click();
-        recordedChunks = [];
-    };
 }
 
 function loadTrack(index) {
     if (index < 0 || index >= playlist.length) return;
     currentTrackIndex = index;
     initAudio();
-    if(audioCtx.state === 'suspended') audioCtx.resume();
     audioEl.src = URL.createObjectURL(playlist[index]);
-    audioEl.load();
-    audioEl.play().then(() => playIcon.className = "bi bi-pause-fill");
-    document.getElementById('trackTitle').innerText = playlist[index].name;
+    audioEl.play();
+    playIcon.className = "bi bi-pause-fill";
+    
+    jsmediatags.read(playlist[index], {
+        onSuccess: (tag) => {
+            const { title, artist, picture } = tag.tags;
+            document.getElementById('trackTitle').innerText = title || playlist[index].name;
+            document.getElementById('trackArtist').innerText = artist || translations[lang].unknownArtist;
+            if (picture) {
+                let base64 = "";
+                for (let i = 0; i < picture.data.length; i++) base64 += String.fromCharCode(picture.data[i]);
+                document.getElementById('albumArt').src = `data:${picture.format};base64,${window.btoa(base64)}`;
+            } else {
+                document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+            }
+        },
+        onError: () => {
+            document.getElementById('trackTitle').innerText = playlist[index].name;
+            document.getElementById('trackArtist').innerText = translations[lang].unknownArtist;
+        }
+    });
     renderPlaylist();
 }
 
@@ -80,18 +116,9 @@ function renderPlaylist() {
     ).join('');
 }
 
-// Events
-document.getElementById('recordBtn').onclick = () => {
-    if (!isRecording) {
-        initAudio(); recorder.start(); isRecording = true;
-    } else {
-        recorder.stop(); isRecording = false;
-    }
-    updateUI();
-};
-
 document.getElementById('fileInput').onchange = e => {
-    playlist = [...playlist, ...e.target.files]; renderPlaylist();
+    playlist = [...playlist, ...Array.from(e.target.files)];
+    renderPlaylist();
     if(currentTrackIndex === -1) loadTrack(0);
 };
 
@@ -100,31 +127,70 @@ document.getElementById('playBtn').onclick = () => {
     else { audioEl.pause(); playIcon.className = "bi bi-play-fill"; }
 };
 
-document.getElementById('nextBtn').onclick = () => loadTrack(currentTrackIndex + 1);
-document.getElementById('prevBtn').onclick = () => loadTrack(currentTrackIndex - 1);
-document.getElementById('loopToggle').onclick = () => { loopState = (loopState + 1) % 3; updateUI(); };
+document.getElementById('nextBtn').onclick = () => {
+    if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1);
+    else if (loopState === 1) loadTrack(0);
+};
 
-document.getElementById('resetBtn').onclick = () => { 
-    savedGains = [0,0,0,0,0]; localStorage.setItem('eq-gains', JSON.stringify(savedGains)); updateUI(); 
+document.getElementById('prevBtn').onclick = () => loadTrack(currentTrackIndex - 1);
+
+audioEl.onended = () => {
+    if (loopState === 2) audioEl.play();
+    else if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1);
+    else if (loopState === 1) loadTrack(0);
+};
+
+document.getElementById('loopToggle').onclick = () => {
+    loopState = (loopState + 1) % 3;
+    localStorage.setItem('eq-loop-state', loopState);
+    updateUI();
+};
+
+document.getElementById('resetBtn').onclick = () => {
+    savedGains = [0,0,0,0,0];
+    localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+    updateUI();
 };
 
 document.getElementById('clearPlaylistBtn').onclick = () => {
-    if(confirm(translations[lang].confirm)) { playlist = []; currentTrackIndex = -1; audioEl.src = ""; renderPlaylist(); }
+    if(confirm(translations[lang].confirmClear)) {
+        playlist = []; currentTrackIndex = -1; audioEl.src = "";
+        document.getElementById('albumArt').src = "https://cdn-icons-png.flaticon.com/512/3844/3844724.png";
+        renderPlaylist(); updateUI();
+    }
 };
 
 document.getElementById('exportBtn').onclick = () => {
     const blob = new Blob([JSON.stringify({gains: savedGains, theme, lang})], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'config.json'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'eq-config.json'; a.click();
 };
 
-document.querySelectorAll('input.vertical').forEach(s => {
+document.getElementById('importInput').onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const data = JSON.parse(ev.target.result);
+        if(data.gains) savedGains = data.gains;
+        if(data.theme) theme = data.theme;
+        if(data.lang) lang = data.lang;
+        localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+        localStorage.setItem('theme', theme);
+        localStorage.setItem('lang', lang);
+        updateUI();
+    };
+    reader.readAsText(e.target.files[0]);
+};
+
+document.querySelectorAll('.vert-range').forEach(s => {
     s.oninput = e => {
         const i = e.target.dataset.index, v = e.target.value;
         document.getElementById(`db${i}`).innerText = v + 'dB';
         if(filters[i]) filters[i].gain.value = v;
-        savedGains[i] = v; localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+        savedGains[i] = v;
+        localStorage.setItem('eq-gains', JSON.stringify(savedGains));
     };
 });
+
+document.getElementById('volSlider').oninput = e => audioEl.volume = e.target.value;
 
 audioEl.ontimeupdate = () => {
     progSlider.value = (audioEl.currentTime / audioEl.duration) * 100 || 0;
@@ -133,7 +199,18 @@ audioEl.ontimeupdate = () => {
     document.getElementById('durationTime').innerText = fmt(audioEl.duration || 0);
 };
 
-document.getElementById('themeToggle').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; updateUI(); };
-document.getElementById('langSelect').onchange = e => { lang = e.target.value; updateUI(); };
+document.getElementById('progressSlider').oninput = e => audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+
+document.getElementById('themeToggle').onclick = () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', theme);
+    updateUI();
+};
+
+document.getElementById('langSelect').onchange = e => {
+    lang = e.target.value;
+    localStorage.setItem('lang', lang);
+    updateUI();
+};
 
 updateUI();
