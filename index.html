@@ -24,7 +24,9 @@
                             <option value="fr">FR</option>
                             <option value="en">EN</option>
                         </select>
-                        <button id="themeToggle" class="btn btn-outline-secondary btn-sm"><i id="themeIcon" class="bi bi-moon-stars-fill"></i></button>
+                        <button id="themeToggle" class="btn btn-outline-secondary btn-sm">
+                            <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -68,10 +70,10 @@
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 justify-content-center pt-3 border-top">
-                    <button id="exportBtn" class="btn btn-outline-success btn-sm fw-bold">Export JSON</button>
-                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0 fw-bold" id="ui-import-label">Import JSON</label>
+                    <button id="exportBtn" class="btn btn-outline-success btn-sm fw-bold">Exporter JSON</button>
+                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0 fw-bold" id="ui-import-label">Importer JSON</label>
                     <input type="file" id="importInput" accept=".json" class="d-none">
-                    <button id="resetBtn" class="btn btn-outline-danger btn-sm">Reset EQ</button>
+                    <button id="resetBtn" class="btn btn-outline-danger btn-sm fw-bold">Réinitialiser EQ</button>
                 </div>
             </div>
         </div>
@@ -80,7 +82,7 @@
             <div class="card p-3 shadow-lg border-0 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0" id="ui-playlist-title">Playlist</h6>
-                    <button id="clearPlaylistBtn" class="btn btn-sm text-danger p-0 fw-bold" id="ui-clear">Vider</button>
+                    <button id="clearPlaylistBtn" class="btn btn-sm text-danger p-0 fw-bold">Vider</button>
                 </div>
                 <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 500px;"></div>
             </div>
