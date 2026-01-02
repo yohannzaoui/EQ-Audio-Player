@@ -2,8 +2,8 @@
 <html lang="fr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Master EQ & Record</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ Audio Player</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
@@ -11,16 +11,13 @@
 </head>
 <body>
 
-<div class="container-fluid py-4 px-2 px-lg-5">
+<div class="container py-4">
     <div class="row g-4 justify-content-center">
         <div class="col-12 col-lg-7">
-            <div class="card p-3 p-sm-4 shadow-lg border-0 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <h5 id="ui-title" class="mb-0 fw-bold">Audio Master EQ</h5>
-                    <div class="d-flex gap-2 ms-auto align-items-center">
-                        <button id="recordBtn" class="btn btn-outline-danger btn-sm px-2">
-                            <i class="bi bi-record-circle-fill me-1"></i><span id="ui-record">Record</span>
-                        </button>
+            <div class="card p-4 shadow-lg border-0 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 id="ui-title" class="mb-0 fw-bold">EQ Audio Player</h5>
+                    <div class="d-flex gap-2 align-items-center">
                         <label for="fileInput" class="btn btn-primary btn-sm mb-0" id="ui-btn-label">Charger</label>
                         <input type="file" id="fileInput" accept="audio/*" class="d-none" multiple>
                         <select id="langSelect" class="form-select form-select-sm w-auto">
@@ -39,18 +36,18 @@
                     <p id="trackArtist" class="small opacity-75">Sélectionnez un fichier</p>
                 </div>
 
-                <div class="main-controls-card p-3 mb-4">
-                    <div class="d-flex align-items-center justify-content-center justify-content-md-between gap-3 flex-wrap">
-                        <div class="d-flex align-items-center gap-2">
+                <div class="controls-card p-3 mb-4 rounded bg-secondary bg-opacity-10">
+                    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 mx-auto mx-md-0">
                             <button id="prevBtn" class="btn btn-outline-secondary btn-round"><i class="bi bi-skip-start-fill"></i></button>
                             <button id="playBtn" class="btn btn-accent-round"><i id="playIcon" class="bi bi-play-fill"></i></button>
                             <button id="nextBtn" class="btn btn-outline-secondary btn-round"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
-                        <div class="volume-box flex-grow-1 d-flex align-items-center gap-2 px-3">
+                        <div class="flex-grow-1 d-flex align-items-center gap-2 px-2" style="min-width: 150px;">
                             <i class="bi bi-volume-up-fill"></i>
                             <input type="range" id="volSlider" class="form-range" min="0" max="1" step="0.01" value="0.7">
                         </div>
-                        <button id="loopToggle" class="btn btn-outline-secondary btn-round"><i id="loopIcon" class="bi bi-repeat"></i></button>
+                        <button id="loopToggle" class="btn btn-outline-secondary btn-round mx-auto mx-md-0"><i id="loopIcon" class="bi bi-repeat"></i></button>
                     </div>
                 </div>
 
@@ -62,17 +59,17 @@
                     </div>
                 </div>
 
-                <div class="eq-container mb-4">
-                    <div class="slider-unit"><span class="db-label" id="db0">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="0"><span>60Hz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db1">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="1"><span>250Hz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db2">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="2"><span>1kHz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db3">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="3"><span>4kHz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db4">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="4"><span>16kHz</span></div>
+                <div class="eq-grid mb-4 p-3 rounded bg-light bg-opacity-10">
+                    <div class="eq-item"><span class="db-txt" id="db0">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="0"><span>60Hz</span></div>
+                    <div class="eq-item"><span class="db-txt" id="db1">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="1"><span>250Hz</span></div>
+                    <div class="eq-item"><span class="db-txt" id="db2">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="2"><span>1kHz</span></div>
+                    <div class="eq-item"><span class="db-txt" id="db3">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="3"><span>4kHz</span></div>
+                    <div class="eq-item"><span class="db-txt" id="db4">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="4"><span>16kHz</span></div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 justify-content-center pt-3 border-top">
-                    <button id="exportBtn" class="btn btn-outline-success btn-sm">Export JSON</button>
-                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0">Import JSON</label>
+                    <button id="exportBtn" class="btn btn-outline-success btn-sm fw-bold">Export JSON</button>
+                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0 fw-bold" id="ui-import-label">Import JSON</label>
                     <input type="file" id="importInput" accept=".json" class="d-none">
                     <button id="resetBtn" class="btn btn-outline-danger btn-sm">Reset EQ</button>
                 </div>
@@ -82,15 +79,15 @@
         <div class="col-12 col-lg-4">
             <div class="card p-3 shadow-lg border-0 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0">Playlist</h6>
-                    <button id="clearPlaylistBtn" class="btn btn-sm text-danger p-0 fw-bold">Vider</button>
+                    <h6 class="fw-bold mb-0" id="ui-playlist-title">Playlist</h6>
+                    <button id="clearPlaylistBtn" class="btn btn-sm text-danger p-0 fw-bold" id="ui-clear">Vider</button>
                 </div>
                 <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 500px;"></div>
             </div>
         </div>
     </div>
 </div>
-<audio id="audioSource" playsinline class="d-none"></audio>
+<audio id="audioSource" class="d-none"></audio>
 <script src="script.js"></script>
 </body>
 </html>
