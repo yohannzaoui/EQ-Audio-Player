@@ -27,8 +27,10 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
 .vert-range { appearance: slider-vertical; width: 12px; height: 150px; cursor: pointer; }
 .db-txt { font-size: 0.75rem; color: var(--accent-color); font-weight: bold; }
 
-.playlist-item { background: transparent !important; color: var(--text-color) !important; border-color: var(--border-color) !important; cursor: pointer; border-radius: 8px !important; margin-bottom: 5px; text-align: left; }
+.playlist-item { background: transparent !important; color: var(--text-color) !important; border-color: var(--border-color) !important; cursor: pointer; border-radius: 8px !important; margin-bottom: 5px; text-align: left; transition: 0.2s; }
 .playlist-item.active { background: var(--accent-color) !important; color: #fff !important; font-weight: bold; }
+
+#langSelect { border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-color); }
 
 .custom-toast { background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: slideIn 0.3s, fadeOut 0.3s 2.5s forwards; z-index: 9999; }
 @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
