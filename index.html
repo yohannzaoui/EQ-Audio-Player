@@ -1,96 +1,425 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lecteur Audio EQ Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ Audio Player</title>
+    <meta name="author" content="Yohann Zaoui">
+    
+    <link rel="icon" href="img/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="img/favicon.png" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1abc9c">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+
+    <style>
+        :root { 
+            --bg: #121212; --card: #1e1e1e; --txt: #ffffff; --accent: #1abc9c; 
+            --inner-bg: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
+            --progress-bg: rgba(255,255,255,0.2);
+            --btn-inactive: rgba(255,255,255,0.45);
+            --btn-load: #1abc9c;
+        }
+        [data-theme="light"] { 
+            --bg: #e9ecef; --card: #ffffff; --txt: #212529; --accent: #3498db; 
+            --inner-bg: #f8f9fa; --border: rgba(0,0,0,0.1);
+            --progress-bg: rgba(0,0,0,0.1);
+            --btn-inactive: rgba(0,0,0,0.4);
+            --btn-load: #3498db;
+        }
+
+        body { background-color: var(--bg); color: var(--txt); min-height: 100vh; display: flex; align-items: center; transition: all 0.4s ease; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .card { background-color: var(--card); color: var(--txt); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; height: 100%; transition: background 0.3s; }
+
+        .player-header-flex { display: flex; align-items: center; gap: 25px; margin-bottom: 30px; }
+        .main-album-art {
+            width: 200px; height: 200px; min-width: 200px;
+            border-radius: 15px; overflow: hidden; background: var(--inner-bg);
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        #albumArtImg { width: 100%; height: 100%; object-fit: cover; }
+        #artIcon { font-size: 5rem; opacity: 0.3; }
+
+        .now-playing-info {
+            flex-grow: 1; background: var(--accent); color: white; 
+            padding: 25px; border-radius: 15px; text-align: left;
+            display: flex; flex-direction: column; justify-content: center;
+            height: 200px; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        #formatTag {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0,0,0,0.2); padding: 2px 8px;
+            border-radius: 4px; font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+        }
+
+        .progress-wrapper { width: 100%; margin-bottom: 20px; }
+        .progress-container { width: 100%; height: 8px; background: var(--progress-bg); border-radius: 4px; cursor: pointer; position: relative; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 4px; }
+        .time-display { display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 5px; opacity: 0.7; }
+
+        .volume-container { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; justify-content: center; }
+        .volume-slider { appearance: none; width: 150px; height: 5px; background: var(--progress-bg); border-radius: 5px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
+        .volume-icon { font-size: 1.4rem; color: var(--accent); cursor: pointer; transition: 0.2s; }
+
+        .btn-load-music {
+            background-color: var(--btn-load); border: none; color: white; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.3;
+        }
+        .btn-load-music:hover { transform: translateY(-2px); filter: brightness(1.1); color: white; }
+        .btn-load-subtitle { font-size: 0.65rem; font-weight: normal; opacity: 0.85; margin-top: 2px; letter-spacing: 0.5px; }
+
+        /* PLAYLIST AJUSTÉE POUR TOUTE LA HAUTEUR */
+        .playlist-container { 
+            flex-grow: 1; /* Remplit l'espace */
+            overflow-y: auto; 
+            background: var(--inner-bg); 
+            margin: 15px; 
+            margin-bottom: 5px; /* Espace réduit au dessus du bouton */
+            border-radius: 12px; 
+            scrollbar-width: none; 
+        }
+        .playlist-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+        .playlist-item.active { color: var(--accent); font-weight: bold; background: rgba(26, 188, 156, 0.1); border-left: 4px solid var(--accent); }
+
+        .eq-container { display: flex; justify-content: space-around; background: var(--inner-bg); padding: 20px 10px; border-radius: 15px; border: 1px solid var(--border); }
+        .range-wrapper { height: 130px; width: 35px; display: flex; justify-content: center; align-items: center; }
+        input[type="range"].vertical { appearance: none; width: 120px; height: 4px; background: rgba(128,128,128,0.3); transform: rotate(-90deg); cursor: pointer; }
+        input[type="range"].vertical::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; border: 2px solid #fff; }
+
+        .control-btn { font-size: 2.5rem; color: var(--accent); background: none; border: none; transition: 0.2s; padding: 0; line-height: 1; vertical-align: middle; }
+        .control-btn:hover { transform: scale(1.1); }
+        .small-btn { font-size: 1.6rem; color: var(--btn-inactive); margin: 0 15px; position: relative; transition: all 0.3s ease; }
+        .small-btn.active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); }
+        
+        .repeat-one-badge { 
+            font-size: 0.6rem; position: absolute; bottom: -2px; right: -6px; background: var(--accent); color: white; 
+            width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; border: 2px solid var(--card); box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
 </head>
 <body>
 
-<div class="container-fluid py-4 px-2 px-lg-5">
-    <div class="row g-4 justify-content-center">
-        
-        <div class="col-12 col-lg-7">
-            <div class="card p-3 p-sm-4 shadow-lg border-0 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                    <div class="d-flex align-items-center">
-                        <h5 id="ui-title" class="mb-0 fw-bold">Lecteur Audio EQ</h5>
+<div class="container py-5">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-8">
+            <div class="card shadow-lg p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 fw-bold">EQ Audio Player</h5>
+                    <button id="themeToggle" class="btn btn-outline-secondary btn-sm"><i id="themeIcon" class="bi bi-moon-stars-fill"></i></button>
+                </div>
+
+                <div class="player-header-flex">
+                    <div class="main-album-art">
+                        <img id="albumArtImg" src="" alt="" style="display:none;">
+                        <i id="artIcon" class="bi bi-music-note-beamed"></i>
                     </div>
-                    <div class="d-flex gap-2 ms-auto align-items-center">
-                        <label for="fileInput" class="btn btn-primary btn-sm px-2 px-sm-3 mb-0" id="ui-btn-label">Charger</label>
-                        <input type="file" id="fileInput" accept="audio/*" class="d-none" multiple>
-                        <select id="langSelect" class="form-select form-select-sm w-auto">
-                            <option value="fr">FR</option>
-                            <option value="en">EN</option>
-                        </select>
-                        <button id="themeToggle" class="btn btn-outline-secondary btn-sm">
-                            <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+                    <div class="now-playing-info shadow-sm">
+                        <div id="formatTag" style="display:none;">---</div>
+                        <div class="fw-bold text-truncate fs-4 mb-1" id="metaTitle">No track selected</div>
+                        <div class="fs-6 opacity-80 text-truncate" id="metaArtist">Please load your music</div>
+                    </div>
+                </div>
+
+                <div class="progress-wrapper">
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <button id="shuffleBtn" class="control-btn small-btn" title="Shuffle"><i class="bi bi-shuffle"></i></button>
+                        <button id="prevBtn" class="control-btn"><i class="bi bi-skip-backward-circle-fill"></i></button>
+                        <button id="playPauseBtn" class="control-btn mx-3" style="font-size: 3.5rem;"><i id="playIcon" class="bi bi-play-circle-fill"></i></button>
+                        <button id="nextBtn" class="control-btn"><i class="bi bi-skip-forward-circle-fill"></i></button>
+                        <button id="repeatBtn" class="control-btn small-btn" title="Repeat Mode">
+                            <i id="repeatIcon" class="bi bi-repeat"></i>
+                            <span id="repeatBadge" class="repeat-one-badge" style="display:none;">1</span>
                         </button>
                     </div>
+
+                    <div class="volume-container">
+                        <i id="volIcon" class="bi bi-volume-up-fill volume-icon"></i>
+                        <input type="range" id="volSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.05">
+                    </div>
+
+                    <div class="eq-container mb-4" id="eqBars"></div>
                 </div>
 
-                <div class="album-section mb-4 text-center">
-                    <div class="art-wrapper mx-auto mb-3">
-                        <img id="albumArt" src="https://cdn-icons-png.flaticon.com/512/3844/3844724.png" alt="Pochette">
-                    </div>
-                    <div class="track-info">
-                        <h5 id="trackTitle" class="mb-1 text-truncate px-3 text-contrast">Prêt à jouer</h5>
-                        <p id="trackArtist" class="small text-muted-contrast">Sélectionnez un fichier</p>
-                    </div>
-                </div>
-
-                <div class="main-controls-card p-3 mb-4">
-                    <div class="d-flex align-items-center justify-content-center justify-content-md-between gap-3 flex-wrap">
-                        <div class="d-flex align-items-center justify-content-center gap-2">
-                            <button id="prevBtn" class="btn btn-outline-secondary btn-round"><i class="bi bi-skip-start-fill"></i></button>
-                            <button id="playBtn" class="btn btn-accent-round"><i id="playIcon" class="bi bi-play-fill"></i></button>
-                            <button id="nextBtn" class="btn btn-outline-secondary btn-round"><i class="bi bi-skip-end-fill"></i></button>
-                        </div>
-
-                        <div class="volume-box flex-grow-1 d-flex align-items-center justify-content-center gap-2 px-3 mx-2" style="min-width: 180px;">
-                            <i id="volIcon" class="bi bi-volume-up-fill"></i>
-                            <input type="range" id="volSlider" class="form-range" min="0" max="1" step="0.01" value="0.7">
-                        </div>
-                    </div>
-                    <audio id="audioSource" playsinline preload="auto" class="d-none"></audio>
-                </div>
-
-                <div class="progress-zone mb-3 px-2">
-                    <input type="range" id="progressSlider" class="form-range seek-bar" min="0" max="100" value="0">
-                    <div class="d-flex justify-content-between mt-1 small fw-bold text-contrast">
-                        <span id="currentTime">0:00</span>
-                        <span id="durationTime">0:00</span>
-                    </div>
-                </div>
-
-                <div class="eq-container mb-4">
-                    <div class="slider-unit"><span class="db-label" id="db0">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="0"><span class="hz-label">60Hz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db1">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="1"><span class="hz-label">250Hz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db2">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="2"><span class="hz-label">1kHz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db3">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="3"><span class="hz-label">4kHz</span></div>
-                    <div class="slider-unit"><span class="db-label" id="db4">0dB</span><input type="range" class="vertical" min="-20" max="20" value="0" data-index="4"><span class="hz-label">16kHz</span></div>
+                <div class="d-flex gap-4 justify-content-center border-top pt-3">
+                    <button id="exportBtn" class="btn btn-link btn-sm text-decoration-none text-success fw-bold">EXPORT EQ</button>
+                    <label for="importInput" class="btn btn-link btn-sm text-decoration-none text-info fw-bold" style="cursor:pointer">IMPORT EQ</label>
+                    <input type="file" id="importInput" accept=".json" class="d-none">
+                    <button id="resetBtn" class="btn btn-link btn-sm text-decoration-none text-danger fw-bold">RESET EQ</button>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-lg-4">
-            <div class="card p-3 shadow-lg border-0 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0"><i class="bi bi-music-note-list me-2"></i> Playlist</h6>
-                    <button id="clearPlaylistBtn" class="btn btn-outline-danger btn-xs py-0 px-2" style="font-size: 0.75rem;">
-                        <i class="bi bi-trash3 me-1"></i><span id="ui-clear">Vider</span>
-                    </button>
+        <div class="col-lg-4">
+            <div class="card shadow-lg d-flex flex-column" style="height: 100%;">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">MY LIBRARY</h6>
+                    <button id="clearBtn" class="btn btn-sm text-danger p-0"><i class="bi bi-trash3"></i></button>
                 </div>
-                <div id="playlistContainer" class="list-group list-group-flush overflow-auto custom-scrollbar" style="max-height: 450px;">
-                    </div>
+                <div id="playlist" class="playlist-container"></div>
+                <div class="p-3 border-top mt-auto">
+                    <label for="fileInput" class="btn-load-music text-center d-block shadow-sm" style="cursor:pointer">
+                        <span>LOAD MUSIC</span>
+                        <span class="btn-load-subtitle">MP3, WAV, OGG, M4A, FLAC</span>
+                    </label>
+                    <input type="file" id="fileInput" accept="audio/*" multiple class="d-none">
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script src="script.js"></script>
+
+<audio id="audioSource"></audio>
+
+<script>
+    const jsmediatags = window.jsmediatags;
+    const audioEl = document.getElementById('audioSource');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const progressFill = document.getElementById('progressFill');
+    const volSlider = document.getElementById('volSlider');
+    const volIcon = document.getElementById('volIcon');
+    const formatTag = document.getElementById('formatTag');
+    
+    let lastVolume = 0.05;
+    audioEl.volume = 0.05;
+
+    function updateVolumeUI(val) {
+        volSlider.value = val;
+        if (val == 0) volIcon.className = "bi bi-volume-mute-fill volume-icon text-danger";
+        else if (val < 0.5) volIcon.className = "bi bi-volume-down-fill volume-icon";
+        else volIcon.className = "bi bi-volume-up-fill volume-icon";
+    }
+
+    volSlider.oninput = (e) => {
+        const val = parseFloat(e.target.value);
+        audioEl.volume = val;
+        if (val > 0) lastVolume = val;
+        updateVolumeUI(val);
+    };
+
+    volIcon.onclick = () => {
+        if (audioEl.volume > 0) { lastVolume = audioEl.volume; audioEl.volume = 0; }
+        else { audioEl.volume = lastVolume || 0.05; }
+        updateVolumeUI(audioEl.volume);
+    };
+
+    let playlist = [], currentIndex = 0, isShuffle = false, repeatMode = 0; 
+    let theme = localStorage.getItem('theme') || 'dark';
+    let savedGains = JSON.parse(localStorage.getItem('eq-gains') || '[0,0,0,0,0]');
+    let audioCtx, source, filters = [], freqs = [60, 250, 1000, 4000, 16000];
+
+    function createEqUI() {
+        const eqBars = document.getElementById('eqBars');
+        eqBars.innerHTML = '';
+        freqs.forEach((f, i) => {
+            eqBars.innerHTML += `<div class="text-center">
+                <span class="small d-block" style="font-size:0.65rem;" id="db${i}">${savedGains[i]}dB</span>
+                <div class="range-wrapper"><input type="range" class="vertical eq-slider" min="-20" max="20" value="${savedGains[i]}" data-index="${i}"></div>
+                <span class="small d-block mt-2" style="font-size:0.7rem;">${f >= 1000 ? (f/1000)+'k' : f}Hz</span>
+            </div>`;
+        });
+        attachSliderEvents();
+    }
+
+    function initAudio() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        source = audioCtx.createMediaElementSource(audioEl);
+        let lastNode = source;
+        filters = freqs.map((f, i) => {
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = "peaking"; filter.frequency.value = f; filter.gain.value = savedGains[i];
+            lastNode.connect(filter); lastNode = filter; return filter;
+        });
+        lastNode.connect(audioCtx.destination);
+    }
+
+    function attachSliderEvents() {
+        document.querySelectorAll('.eq-slider').forEach(s => {
+            s.oninput = (e) => {
+                const i = e.target.dataset.index;
+                const val = parseInt(e.target.value);
+                document.getElementById(`db${i}`).innerText = val + 'dB';
+                savedGains[i] = val;
+                localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+                if (filters[i]) filters[i].gain.setTargetAtTime(val, audioCtx.currentTime, 0.01);
+            };
+        });
+    }
+
+    function loadTrack(index) {
+        if (index < 0 || index >= playlist.length) return;
+        initAudio();
+        currentIndex = index;
+        if (audioEl.src) URL.revokeObjectURL(audioEl.src);
+        const trackFile = playlist[index];
+        audioEl.src = URL.createObjectURL(trackFile);
+        
+        const ext = trackFile.name.split('.').pop().toUpperCase();
+        formatTag.innerText = ext;
+        formatTag.style.display = 'block';
+
+        document.getElementById('metaTitle').innerText = trackFile.name;
+        document.getElementById('metaArtist').innerText = "Unknown Artist";
+        resetArt();
+        audioEl.play().catch(e => console.log("Playback error:", e));
+        playIcon.className = "bi bi-pause-circle-fill";
+        jsmediatags.read(trackFile, {
+            onSuccess: (tag) => {
+                const { title, artist, picture } = tag.tags;
+                if (title) document.getElementById('metaTitle').innerText = title;
+                if (artist) document.getElementById('metaArtist').innerText = artist;
+                if (picture) {
+                    let base64 = "";
+                    for (let i = 0; i < picture.data.length; i++) base64 += String.fromCharCode(picture.data[i]);
+                    document.getElementById('albumArtImg').src = `data:${picture.format};base64,${window.btoa(base64)}`;
+                    document.getElementById('albumArtImg').style.display = 'block';
+                    document.getElementById('artIcon').style.display = 'none';
+                }
+            }
+        });
+        renderPlaylist();
+    }
+
+    playPauseBtn.onclick = () => {
+        if (!audioEl.src && playlist.length > 0) loadTrack(0);
+        else if (audioEl.paused) { audioEl.play(); playIcon.className = "bi bi-pause-circle-fill"; }
+        else { audioEl.pause(); playIcon.className = "bi bi-play-circle-fill"; }
+    };
+
+    audioEl.ontimeupdate = () => {
+        const pct = (audioEl.currentTime / audioEl.duration) * 100 || 0;
+        progressFill.style.width = pct + "%";
+        document.getElementById('currentTime').innerText = formatTime(audioEl.currentTime);
+        document.getElementById('duration').innerText = formatTime(audioEl.duration || 0);
+    };
+
+    document.getElementById('progressContainer').onclick = (e) => {
+        const pct = e.offsetX / e.currentTarget.offsetWidth;
+        audioEl.currentTime = pct * audioEl.duration;
+    };
+
+    function formatTime(s) {
+        const m = Math.floor(s/60), sec = Math.floor(s%60);
+        return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function handleNext() {
+        if (playlist.length === 0) return;
+        if (isShuffle) {
+            let next; do { next = Math.floor(Math.random() * playlist.length); } while (next === currentIndex && playlist.length > 1);
+            loadTrack(next);
+        } else {
+            if (currentIndex < playlist.length - 1) loadTrack(currentIndex + 1);
+            else if (repeatMode === 2) loadTrack(0);
+        }
+    }
+
+    document.getElementById('nextBtn').onclick = handleNext;
+    document.getElementById('prevBtn').onclick = () => loadTrack(currentIndex - 1);
+    audioEl.onended = () => { if (repeatMode === 1) loadTrack(currentIndex); else handleNext(); };
+
+    document.getElementById('shuffleBtn').onclick = (e) => { isShuffle = !isShuffle; e.currentTarget.classList.toggle('active', isShuffle); };
+
+    document.getElementById('repeatBtn').onclick = () => {
+        repeatMode = (repeatMode + 1) % 3;
+        const btn = document.getElementById('repeatBtn');
+        const badge = document.getElementById('repeatBadge');
+        btn.classList.remove('active'); badge.style.display = 'none';
+        if (repeatMode === 1) { btn.classList.add('active'); badge.style.display = 'flex'; }
+        else if (repeatMode === 2) { btn.classList.add('active'); }
+    };
+
+    document.getElementById('exportBtn').onclick = () => {
+        const blob = new Blob([JSON.stringify({ gains: savedGains, theme: theme })], {type: "application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "eq_settings.json"; a.click();
+    };
+
+    document.getElementById('resetBtn').onclick = () => {
+        savedGains = [0,0,0,0,0]; localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+        createEqUI(); if (audioCtx) filters.forEach((f, i) => f.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01));
+    };
+
+    document.getElementById('importInput').onchange = (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const data = JSON.parse(event.target.result);
+            if (data.gains) {
+                savedGains = data.gains; localStorage.setItem('eq-gains', JSON.stringify(savedGains));
+                createEqUI(); if (audioCtx) filters.forEach((f, i) => f.gain.setTargetAtTime(savedGains[i], audioCtx.currentTime, 0.01));
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    document.getElementById('themeToggle').onclick = () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', theme);
+        applyTheme();
+    };
+
+    function applyTheme() {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    }
+
+    document.getElementById('fileInput').onchange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length) { playlist = [...playlist, ...files]; renderPlaylist(); if (!audioEl.src) loadTrack(0); }
+    };
+
+    document.getElementById('clearBtn').onclick = () => {
+        if(confirm("Clear library?")) { 
+            playlist = []; currentIndex = 0; audioEl.pause(); audioEl.src = ""; 
+            formatTag.style.display = 'none';
+            renderPlaylist(); resetArt(); 
+        }
+    };
+
+    function renderPlaylist() {
+        const p = document.getElementById('playlist');
+        p.innerHTML = playlist.length ? '' : '<div class="p-5 text-center opacity-50">Empty</div>';
+        playlist.forEach((f, i) => {
+            const div = document.createElement('div');
+            div.className = `playlist-item ${i === currentIndex ? 'active' : ''}`;
+            div.innerHTML = `<i class="bi bi-music-note"></i> <span class="text-truncate">${f.name}</span>`;
+            div.onclick = () => loadTrack(i);
+            p.appendChild(div);
+        });
+    }
+
+    function resetArt() { 
+        document.getElementById('albumArtImg').style.display = 'none'; 
+        document.getElementById('artIcon').style.display = 'block'; 
+        document.getElementById('metaTitle').innerText = "No track selected";
+        document.getElementById('metaArtist').innerText = "Please load your music";
+    }
+
+    createEqUI();
+    applyTheme();
+    renderPlaylist();
+    updateVolumeUI(0.05);
+</script>
 </body>
 </html>
