@@ -2,78 +2,74 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hi-Fi Audio Player</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
-        :root { --bg-color: #f8f9fa; --card-bg: #ffffff; --text-main: #212529; --accent-color: #007aff; }
-        body.dark-theme { --bg-color: #000000; --card-bg: #1c1c1e; --text-main: #ffffff; --accent-color: #0a84ff; }
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            transition: 0.3s; 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .player-card { 
-            background-color: var(--card-bg); 
-            border-radius: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            max-width: 380px; 
-            margin: auto; 
-            border: 1px solid rgba(128,128,128,0.1); 
-        }
-        #track-name { font-weight: 600; color: var(--accent-color); font-size: 1rem; }
-        .form-range::-webkit-slider-thumb { background: var(--accent-color); border: 2px solid white; height: 20px; width: 20px; }
-        .btn-ios { border-radius: 12px; font-weight: 600; transition: transform 0.1s; }
-        .btn-ios:active { transform: scale(0.95); }
+        :root { --bg-color: #f8f9fa; --card-bg: #ffffff; --text-main: #212529; --accent-color: #0d6efd; }
+        body.dark-theme { --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #f8f9fa; --accent-color: #3d8bfd; }
+        body { background-color: var(--bg-color); color: var(--text-main); transition: 0.3s; min-height: 100vh; display: flex; align-items: center; padding: 20px 0; }
+        
+        .player-card { background-color: var(--card-bg); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 450px; margin: auto; border: 1px solid rgba(128,128,128,0.1); overflow: hidden; }
+        .btn-theme { position: absolute; top: 20px; right: 20px; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; }
+        
+        #track-name { font-size: 1.1rem; font-weight: 600; color: var(--accent-color); min-height: 1.6em; }
+        .playlist-container { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.03); border-radius: 12px; margin-top: 15px; }
+        .playlist-item { cursor: pointer; padding: 8px 12px; font-size: 0.9rem; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; }
+        .playlist-item:hover { background: rgba(13, 110, 253, 0.1); }
+        .playlist-item.active { background: var(--accent-color); color: white; }
+        
+        .form-range::-webkit-slider-thumb { background: var(--accent-color); }
     </style>
 </head>
 <body class="light-theme">
 
-    <button id="theme-btn" class="btn btn-link text-secondary position-absolute top-0 end-0 m-3 fs-4">
+    <button id="theme-btn" class="btn btn-outline-secondary btn-theme shadow-sm">
         <i class="bi bi-moon-stars"></i>
     </button>
 
-    <div class="container p-3">
+    <div class="container">
         <div class="card player-card p-4">
-            <div class="text-center mb-4">
-                <h4 class="fw-bold m-0">Hi-Fi Audio Player</h4>
-                <p class="small opacity-50">Optimisé pour iOS</p>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="m-0 fw-bold">Hi-Fi Audio Player</h4>
+                <label for="file-upload" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-folder2-open me-1"></i> Importer
+                </label>
+                <input id="file-upload" type="file" accept="audio/*" multiple class="d-none">
             </div>
 
-            <div id="track-name" class="text-center mb-4 text-truncate px-2">Aucun fichier</div>
+            <div id="track-name" class="text-center mb-4 text-truncate px-2">Aucune piste</div>
 
-            <div class="mb-4">
-                <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="1" autocomplete="off">
+            <div class="px-2 mb-4">
+                <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1" autocomplete="off">
                 <div class="d-flex justify-content-between small fw-medium opacity-75 mt-1">
                     <span id="current-time">0:00</span>
                     <span id="duration">0:00</span>
                 </div>
             </div>
 
-            <audio id="audio-player" playsinline></audio>
+            <audio id="audio-player"></audio>
 
             <div class="d-flex flex-column gap-3">
-                <label for="file-upload" class="btn btn-secondary btn-ios w-100 py-2">
-                    <i class="bi bi-folder2-open me-2"></i>Choisir un morceau
-                </label>
-                <input id="file-upload" type="file" accept="audio/*" class="d-none">
-
-                <button id="play-pause" class="btn btn-primary btn-lg btn-ios w-100 py-3 shadow">
-                    <i class="bi bi-play-fill fs-3"></i>
-                </button>
+                <div class="d-flex justify-content-center align-items-center gap-3">
+                    <button id="prev-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-start-fill fs-4"></i></button>
+                    <button id="play-pause" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow"><i class="bi bi-play-fill fs-4"></i></button>
+                    <button id="next-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-end-fill fs-4"></i></button>
+                </div>
                 
-                <div class="p-3 rounded-4 bg-body-tertiary border">
+                <div class="p-3 rounded-pill bg-body-tertiary border shadow-sm">
                     <div class="d-flex align-items-center gap-3">
                         <i class="bi bi-volume-mute-fill" id="vol-icon"></i>
                         <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0" autocomplete="off">
                         <i class="bi bi-volume-up-fill"></i>
                     </div>
-                    <div class="text-center small mt-2 fw-bold text-danger" id="vol-status">Volume : 0%</div>
+                </div>
+
+                <div class="playlist-container" id="playlist">
+                    <div class="text-center p-3 opacity-50 small">La liste est vide</div>
                 </div>
             </div>
         </div>
@@ -87,73 +83,104 @@
         const themeBtn = document.getElementById('theme-btn');
         const fileInput = document.getElementById('file-upload');
         const trackNameEl = document.getElementById('track-name');
-        const volStatus = document.getElementById('vol-status');
+        const playlistEl = document.getElementById('playlist');
+        const volIcon = document.getElementById('vol-icon');
 
-        function resetAll() {
+        let playlist = [];
+        let currentIndex = 0;
+
+        function resetControls() {
             volumeSlider.value = 0;
-            audio.volume = 0;
             seekBar.value = 0;
-            volStatus.textContent = "Volume : 0% (Montez le son)";
+            audio.volume = 0;
         }
 
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    audio.src = e.target.result;
-                    trackNameEl.textContent = file.name;
-                    // Sur iOS, il faut appeler load() avant play()
-                    audio.load();
-                    audio.play();
-                    playBtn.innerHTML = '<i class="bi bi-pause-fill fs-3"></i>';
-                };
-                reader.readAsDataURL(file);
+        // --- GESTION PLAYLIST ---
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                playlist = files;
+                currentIndex = 0;
+                renderPlaylist();
+                loadTrack(currentIndex);
+                audio.play();
+                updatePlayIcon(true);
             }
         });
 
+        function renderPlaylist() {
+            playlistEl.innerHTML = '';
+            playlist.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = `playlist-item ${index === currentIndex ? 'active' : ''}`;
+                item.textContent = `${index + 1}. ${file.name}`;
+                item.onclick = () => { currentIndex = index; loadTrack(index); audio.play(); updatePlayIcon(true); };
+                playlistEl.appendChild(item);
+            });
+        }
+
+        function loadTrack(index) {
+            const file = playlist[index];
+            audio.src = URL.createObjectURL(file);
+            trackNameEl.textContent = file.name;
+            renderPlaylist(); // Mise à jour du style actif
+        }
+
+        // --- COMMANDES ---
         playBtn.addEventListener('click', () => {
             if (!audio.src) return;
-            if (audio.paused) {
-                audio.play();
-                playBtn.innerHTML = '<i class="bi bi-pause-fill fs-3"></i>';
-            } else {
-                audio.pause();
-                playBtn.innerHTML = '<i class="bi bi-play-fill fs-3"></i>';
-            }
+            if (audio.paused) { audio.play(); updatePlayIcon(true); }
+            else { audio.pause(); updatePlayIcon(false); }
         });
 
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex + 1) % playlist.length;
+            loadTrack(currentIndex);
+            audio.play();
+            updatePlayIcon(true);
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentIndex);
+            audio.play();
+            updatePlayIcon(true);
+        });
+
+        audio.addEventListener('ended', () => document.getElementById('next-btn').click());
+
+        function updatePlayIcon(isPlaying) {
+            playBtn.innerHTML = isPlaying ? '<i class="bi bi-pause-fill fs-4"></i>' : '<i class="bi bi-play-fill fs-4"></i>';
+        }
+
+        // --- VOLUME & PROGRESSION ---
         volumeSlider.addEventListener('input', (e) => {
             const val = e.target.value;
             audio.volume = val;
-            const percent = Math.round(val * 100);
-            volStatus.textContent = "Volume : " + percent + "%";
-            volStatus.className = percent === 0 ? "text-center small mt-2 fw-bold text-danger" : "text-center small mt-2 fw-bold text-success";
-            document.getElementById('vol-icon').className = val == 0 ? "bi bi-volume-mute-fill" : "bi bi-volume-up-fill";
+            volIcon.className = val == 0 ? "bi bi-volume-mute-fill" : (val < 0.5 ? "bi bi-volume-down-fill" : "bi bi-volume-up-fill");
         });
 
         audio.addEventListener('timeupdate', () => {
-            if (!isNaN(audio.duration)) {
-                seekBar.value = audio.currentTime;
-                document.getElementById('current-time').textContent = formatTime(audio.currentTime);
-            }
+            seekBar.value = audio.currentTime;
+            document.getElementById('current-time').textContent = formatTime(audio.currentTime);
         });
 
         audio.addEventListener('loadedmetadata', () => {
-            seekBar.max = Math.floor(audio.duration);
+            seekBar.max = audio.duration;
             document.getElementById('duration').textContent = formatTime(audio.duration);
         });
 
-        seekBar.addEventListener('input', () => {
-            audio.currentTime = seekBar.value;
-        });
+        seekBar.addEventListener('input', () => audio.currentTime = seekBar.value);
 
         function formatTime(s) {
             const m = Math.floor(s / 60);
             const sec = Math.floor(s % 60);
-            return m + ":" + (sec < 10 ? '0' : '') + sec;
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
+        // --- THEME ---
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
             const isDark = document.body.classList.contains('dark-theme');
@@ -161,8 +188,10 @@
             localStorage.setItem('hifi_theme', isDark ? 'dark' : 'light');
         });
 
+        // Initialisation
+        resetControls();
         window.addEventListener('load', () => {
-            resetAll();
+            resetControls();
             if (localStorage.getItem('hifi_theme') === 'dark') {
                 document.body.classList.add('dark-theme');
                 themeBtn.innerHTML = '<i class="bi bi-sun"></i>';
