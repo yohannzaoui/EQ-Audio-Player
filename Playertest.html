@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecteur Audio Hi-Fi</title>
+    <title>Lecteur Audio Hi-Fi Pro</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -45,6 +45,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
+            align-items: center;
         }
 
         #track-name {
@@ -79,7 +80,6 @@
         .eq-row input { flex: 1; accent-color: #28a745; }
 
         .controls { display: flex; flex-direction: column; gap: 15px; }
-        .main-btns { display: flex; justify-content: center; }
         
         button {
             padding: 12px 25px;
@@ -99,7 +99,7 @@
             font-size: 0.8rem;
         }
 
-        #theme-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 0.7rem; }
+        #theme-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 0.7rem; padding: 5px; }
         input[type="file"] { display: none; }
     </style>
 </head>
@@ -108,11 +108,11 @@
     <div class="player-container">
         <div class="header">
             <button id="theme-btn">Thème</button>
-            <label for="file-upload" class="file-label">📁 Importer</label>
+            <label for="file-upload" class="file-label">📁 Importer Audio</label>
             <input id="file-upload" type="file" accept=".mp3, .flac, .aac, .ogg, .wav, .m4a">
         </div>
 
-        <h3 id="track-name">Choisissez un fichier</h3>
+        <h3 id="track-name">Aucun fichier</h3>
 
         <div class="progress-container">
             <input type="range" id="seek-bar" value="0" min="0" step="0.1">
@@ -136,13 +136,11 @@
         <audio id="audio-player" crossorigin="anonymous"></audio>
 
         <div class="controls">
-            <div class="main-btns">
-                <button id="play-pause">Lecture</button>
-            </div>
+            <button id="play-pause">Lecture</button>
             
             <div class="eq-row" style="background: var(--secondary-bg); padding: 8px; border-radius: 10px;">
-                <span>Vol</span>
-                <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                <span>Volume</span>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
             </div>
         </div>
     </div>
@@ -154,50 +152,65 @@
         const seekBar = document.getElementById('seek-bar');
         const themeBtn = document.getElementById('theme-btn');
         const fileInput = document.getElementById('file-upload');
+        const bassSlider = document.getElementById('bass-slider');
+        const trebleSlider = document.getElementById('treble-slider');
         
-        // Noeuds Audio
-        let audioCtx;
-        let bassFilter;
-        let trebleFilter;
-        let source;
+        let audioCtx, bassFilter, trebleFilter, gainNode, source;
 
-        // --- INITIALISATION AUDIO CONTEXT ---
+        // --- INITIALISATION CHAINE AUDIO ---
         function initAudioContext() {
             if (audioCtx) return;
 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             source = audioCtx.createMediaElementSource(audio);
 
-            // Filtre Basses (Low Shelf)
+            // 1. Gain Node pour le volume
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = volumeSlider.value;
+
+            // 2. Filtre Basses
             bassFilter = audioCtx.createBiquadFilter();
             bassFilter.type = "lowshelf";
-            bassFilter.frequency.value = 200; // Fréquence limite des basses
+            bassFilter.frequency.value = 200;
+            bassFilter.gain.value = 0; // Forcé à 0
 
-            // Filtre Aigus (High Shelf)
+            // 3. Filtre Aigus
             trebleFilter = audioCtx.createBiquadFilter();
             trebleFilter.type = "highshelf";
-            trebleFilter.frequency.value = 3000; // Fréquence limite des aigus
+            trebleFilter.frequency.value = 3000;
+            trebleFilter.gain.value = 0; // Forcé à 0
 
-            // Chaînage : Source -> Basses -> Aigus -> Sortie
+            // Chaînage : Source -> Basses -> Aigus -> Volume -> Sortie
             source.connect(bassFilter);
             bassFilter.connect(trebleFilter);
-            trebleFilter.connect(audioCtx.destination);
+            trebleFilter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
         }
 
-        // --- GESTION ÉGALISEUR ---
-        document.getElementById('bass-slider').addEventListener('input', (e) => {
+        // --- ÉCOUTEURS ÉGALISEUR ---
+        bassSlider.addEventListener('input', (e) => {
             if (bassFilter) bassFilter.gain.value = e.target.value;
         });
 
-        document.getElementById('treble-slider').addEventListener('input', (e) => {
+        trebleSlider.addEventListener('input', (e) => {
             if (trebleFilter) trebleFilter.gain.value = e.target.value;
         });
 
-        // --- LOGIQUE LECTEUR ---
+        // --- ÉCOUTEUR VOLUME (CORRIGÉ) ---
+        volumeSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (gainNode) {
+                gainNode.gain.value = val;
+            }
+            audio.volume = val; // Mise à jour parallèle pour la sécurité
+            saveSettings();
+        });
+
+        // --- LOGIQUE FICHIERS ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                initAudioContext(); // Initialise au premier chargement
+                initAudioContext();
                 audio.src = URL.createObjectURL(file);
                 document.getElementById('track-name').textContent = file.name;
                 audio.play();
@@ -218,7 +231,7 @@
             }
         });
 
-        // Mise à jour barre de progression
+        // Progression
         audio.addEventListener('timeupdate', () => {
             seekBar.value = audio.currentTime;
             document.getElementById('current-time').textContent = formatTime(audio.currentTime);
@@ -237,11 +250,11 @@
             return `${m}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // --- PRÉFÉRENCES ---
+        // --- THÈME & PERSISTANCE ---
         function saveSettings() {
-            localStorage.setItem('audioPrefs', JSON.stringify({
-                theme: document.body.className,
-                volume: audio.volume
+            localStorage.setItem('audioPrefs_v2', JSON.stringify({
+                theme: document.body.classList.contains('dark-theme') ? 'dark' : 'light',
+                volume: volumeSlider.value
             }));
         }
 
@@ -251,17 +264,19 @@
             saveSettings();
         });
 
-        volumeSlider.addEventListener('input', (e) => {
-            audio.volume = e.target.value;
-            saveSettings();
-        });
-
         window.onload = () => {
-            const prefs = JSON.parse(localStorage.getItem('audioPrefs'));
+            // Reset forcé des curseurs EQ à 0 au chargement
+            bassSlider.value = 0;
+            trebleSlider.value = 0;
+
+            const prefs = JSON.parse(localStorage.getItem('audioPrefs_v2'));
             if (prefs) {
-                document.body.className = prefs.theme;
-                audio.volume = prefs.volume;
+                if (prefs.theme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    themeBtn.textContent = 'Mode Clair';
+                }
                 volumeSlider.value = prefs.volume;
+                audio.volume = prefs.volume;
             }
         };
     </script>
