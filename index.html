@@ -13,76 +13,101 @@
         :root { 
             --bg: #121212; --card: #1e1e1e; --txt: #ffffff; --accent: #1abc9c; 
             --inner-bg: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
+            --header-bg: rgba(255,255,255,0.05);
         }
         [data-theme="light"] { 
             --bg: #e9ecef; --card: #ffffff; --txt: #212529; --accent: #3498db; 
-            --inner-bg: #ffffff; --border: rgba(0,0,0,0.1);
+            --inner-bg: #f8f9fa; --border: rgba(0,0,0,0.1);
+            --header-bg: #ffffff;
         }
 
         body { background-color: var(--bg); color: var(--txt); min-height: 100vh; display: flex; align-items: center; transition: all 0.4s ease; font-family: 'Segoe UI', sans-serif; margin: 0; }
-        .card { background-color: var(--card); color: var(--txt); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; height: 100%; }
+        .card { background-color: var(--card); color: var(--txt); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; height: 100%; transition: background 0.3s; }
 
-        .now-playing-card {
-            background: var(--accent); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;
+        /* --- UPDATED FLEX LAYOUT WITH 200px ART --- */
+        .player-header-flex {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
         }
-        .album-art-container {
-            width: 90px; height: 90px; min-width: 90px; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.1);
+
+        .main-album-art {
+            width: 200px; height: 200px; min-width: 200px;
+            border-radius: 15px; overflow: hidden;
+            background: var(--inner-bg);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
         }
         #albumArtImg { width: 100%; height: 100%; object-fit: cover; }
+        #artIcon { font-size: 5rem; opacity: 0.3; }
 
+        .now-playing-info {
+            flex-grow: 1;
+            background: var(--accent); color: white; 
+            padding: 25px; border-radius: 15px; 
+            text-align: left;
+            display: flex; flex-direction: column; justify-content: center;
+            height: 200px; /* Matched to album art height */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* --- UI ELEMENTS --- */
+        .playlist-header { background-color: var(--header-bg); border-bottom: 1px solid var(--border); padding: 1rem; }
         .playlist-container {
-            flex-grow: 1; overflow-y: auto; max-height: 400px; background: var(--inner-bg); margin: 15px; border-radius: 12px;
-            scrollbar-width: none; -ms-overflow-style: none;
+            flex-grow: 1; overflow-y: auto; max-height: 480px; background: var(--inner-bg); margin: 15px; border-radius: 12px;
+            scrollbar-width: none;
         }
         .playlist-container::-webkit-scrollbar { display: none; }
 
-        .playlist-item {
-            padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; align-items: center; gap: 10px;
-        }
+        .playlist-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
         .playlist-item.active { color: var(--accent); font-weight: bold; background: rgba(26, 188, 156, 0.1); border-left: 4px solid var(--accent); }
 
-        .eq-container { display: flex; justify-content: space-around; background: var(--inner-bg); padding: 25px 10px; border-radius: 15px; border: 1px solid var(--border); }
-        .range-wrapper { height: 150px; width: 35px; display: flex; justify-content: center; align-items: center; }
-        input[type="range"].vertical { appearance: none; width: 140px; height: 4px; background: rgba(128,128,128,0.3); transform: rotate(-90deg); cursor: pointer; }
-        input[type="range"].vertical::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; border: 2px solid #fff; }
+        .eq-container { display: flex; justify-content: space-around; background: var(--inner-bg); padding: 20px 10px; border-radius: 15px; border: 1px solid var(--border); }
+        .range-wrapper { height: 130px; width: 35px; display: flex; justify-content: center; align-items: center; }
+        input[type="range"].vertical { appearance: none; width: 120px; height: 4px; background: rgba(128,128,128,0.3); transform: rotate(-90deg); cursor: pointer; }
+        input[type="range"].vertical::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; border: 2px solid #fff; }
 
-        .control-btn { font-size: 1.8rem; color: var(--accent); background: none; border: none; transition: 0.2s; }
-        .control-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        .control-btn { font-size: 2.3rem; color: var(--accent); background: none; border: none; transition: 0.2s; }
+        .control-btn:hover { transform: scale(1.1); }
+        .control-btn:disabled { opacity: 0.2; }
     </style>
 </head>
 <body>
 
 <div class="container py-5">
     <div class="row g-4 align-items-stretch">
-        <div class="col-lg-7">
+        <div class="col-lg-8">
             <div class="card shadow-lg p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">EQ Audio Player</h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 fw-bold">EQ Audio Player</h5>
                     <button id="themeToggle" class="btn btn-outline-secondary btn-sm"><i id="themeIcon" class="bi bi-moon-stars-fill"></i></button>
                 </div>
 
-                <div class="now-playing-card">
-                    <div class="album-art-container">
+                <div class="player-header-flex">
+                    <div class="main-album-art">
                         <img id="albumArtImg" src="" alt="" style="display:none;">
-                        <i id="artIcon" class="bi bi-music-note-beamed" style="font-size: 2.5rem;"></i>
+                        <i id="artIcon" class="bi bi-music-note-beamed"></i>
                     </div>
-                    <div class="overflow-hidden">
-                        <div class="fw-bold text-truncate" id="metaTitle">No track selected</div>
-                        <div class="small opacity-75 text-truncate" id="metaArtist">Please load your music</div>
+
+                    <div class="now-playing-info shadow-sm">
+                        <div class="fw-bold text-truncate fs-4 mb-1" id="metaTitle">No track selected</div>
+                        <div class="fs-6 opacity-80 text-truncate" id="metaArtist">Please load your music</div>
                     </div>
                 </div>
 
                 <div class="text-center">
                     <div class="d-flex align-items-center justify-content-center gap-4 mb-4">
                         <button id="prevBtn" class="control-btn"><i class="bi bi-skip-backward-circle-fill"></i></button>
-                        <audio id="audioSource" controls class="flex-grow-1"></audio>
+                        <audio id="audioSource" controls class="flex-grow-1" style="height: 40px;"></audio>
                         <button id="nextBtn" class="control-btn"><i class="bi bi-skip-forward-circle-fill"></i></button>
                     </div>
 
                     <div class="eq-container mb-4" id="eqBars"></div>
                 </div>
 
-                <div class="d-flex gap-3 justify-content-center border-top pt-3">
+                <div class="d-flex gap-4 justify-content-center border-top pt-3">
                     <button id="exportBtn" class="btn btn-link btn-sm text-decoration-none text-success fw-bold">EXPORT EQ</button>
                     <label for="importInput" class="btn btn-link btn-sm text-decoration-none text-info fw-bold" style="cursor:pointer">IMPORT EQ</label>
                     <input type="file" id="importInput" accept=".json" class="d-none">
@@ -91,15 +116,15 @@
             </div>
         </div>
 
-        <div class="col-lg-5">
+        <div class="col-lg-4">
             <div class="card shadow-lg d-flex flex-column">
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-dark bg-opacity-10">
+                <div class="playlist-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold">MY LIBRARY</h6>
                     <button id="clearBtn" class="btn btn-sm text-danger p-0"><i class="bi bi-trash3"></i></button>
                 </div>
                 <div id="playlist" class="playlist-container"></div>
                 <div class="p-3 border-top mt-auto">
-                    <label for="fileInput" class="btn btn-primary w-100 fw-bold py-2">LOAD MUSIC</label>
+                    <label for="fileInput" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">LOAD MUSIC</label>
                     <input type="file" id="fileInput" accept="audio/*" multiple class="d-none">
                 </div>
             </div>
@@ -116,8 +141,7 @@
     const metaTitle = document.getElementById('metaTitle');
     const metaArtist = document.getElementById('metaArtist');
 
-    // CONFIGURATION DU VOLUME INITIAL (5%)
-    audioEl.volume = 0.05;
+    audioEl.volume = 0.05; // Default volume 5%
 
     let playlist = [];
     let currentIndex = 0;
@@ -129,15 +153,14 @@
     let filters = [];
     const freqs = [60, 250, 1000, 4000, 16000];
 
-    // Build EQ UI
     const eqBars = document.getElementById('eqBars');
     freqs.forEach((f, i) => {
         const label = f >= 1000 ? (f/1000)+'kHz' : f+'Hz';
         eqBars.innerHTML += `
             <div class="slider-unit text-center">
-                <span class="db-label small" id="db${i}">${savedGains[i]}dB</span>
+                <span class="db-label small" style="font-size:0.7rem;" id="db${i}">${savedGains[i]}dB</span>
                 <div class="range-wrapper"><input type="range" class="vertical eq-slider" min="-20" max="20" value="${savedGains[i]}" data-index="${i}"></div>
-                <span class="hz-label d-block small mt-2">${label}</span>
+                <span class="hz-label d-block small mt-2" style="font-size:0.75rem;">${label}</span>
             </div>`;
     });
 
@@ -165,15 +188,11 @@
 
         currentIndex = index;
         const file = playlist[currentIndex];
-        
         if (audioEl.src) URL.revokeObjectURL(audioEl.src);
         audioEl.src = URL.createObjectURL(file);
         
-        // On s'assure que le volume reste celui choisi par l'utilisateur (ou 5% par défaut)
         const currentVol = audioEl.volume;
-        audioEl.play().then(() => {
-            audioEl.volume = currentVol;
-        });
+        audioEl.play().then(() => { audioEl.volume = currentVol; });
 
         jsmediatags.read(file, {
             onSuccess: (tag) => {
@@ -207,7 +226,6 @@
         document.getElementById('nextBtn').disabled = (currentIndex >= playlist.length - 1);
     }
 
-    // Slider EQ logic
     document.querySelectorAll('.eq-slider').forEach(slider => {
         slider.oninput = (e) => {
             const i = e.target.dataset.index;
@@ -246,9 +264,13 @@
     document.getElementById('themeToggle').onclick = () => {
         theme = (theme === 'dark') ? 'light' : 'dark';
         localStorage.setItem('theme', theme);
+        applyTheme();
+    };
+
+    function applyTheme() {
         document.documentElement.setAttribute('data-theme', theme);
         document.getElementById('themeIcon').className = (theme === 'dark') ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-    };
+    }
 
     document.getElementById('exportBtn').onclick = () => {
         const blob = new Blob([JSON.stringify({gains: savedGains, theme})], {type: "application/json"});
@@ -265,7 +287,7 @@
     };
 
     function resetArt() { albumArtImg.src = ""; albumArtImg.style.display = 'none'; artIcon.style.display = 'block'; }
-    document.documentElement.setAttribute('data-theme', theme);
+    applyTheme();
     renderPlaylist();
 </script>
 </body>
