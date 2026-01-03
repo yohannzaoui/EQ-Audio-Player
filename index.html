@@ -15,14 +15,14 @@
             --inner-bg: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
             --progress-bg: rgba(255,255,255,0.2);
             --btn-inactive: rgba(255,255,255,0.45);
-            --btn-load: #1abc9c; /* Vert émeraude */
+            --btn-load: #1abc9c;
         }
         [data-theme="light"] { 
             --bg: #e9ecef; --card: #ffffff; --txt: #212529; --accent: #3498db; 
             --inner-bg: #f8f9fa; --border: rgba(0,0,0,0.1);
             --progress-bg: rgba(0,0,0,0.1);
             --btn-inactive: rgba(0,0,0,0.4);
-            --btn-load: #3498db; /* Bleu en mode clair pour lisibilité */
+            --btn-load: #3498db;
         }
 
         body { background-color: var(--bg); color: var(--txt); min-height: 100vh; display: flex; align-items: center; transition: all 0.4s ease; font-family: 'Segoe UI', sans-serif; margin: 0; }
@@ -46,30 +46,25 @@
             height: 200px; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
 
-        /* CUSTOM PROGRESS BAR */
         .progress-wrapper { width: 100%; margin-bottom: 20px; }
         .progress-container { width: 100%; height: 8px; background: var(--progress-bg); border-radius: 4px; cursor: pointer; position: relative; }
         .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 4px; }
         .time-display { display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 5px; opacity: 0.7; }
 
-        /* BOUTON LOAD MUSIC PERSONNALISÉ */
+        .volume-container { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; justify-content: center; }
+        .volume-slider { appearance: none; width: 150px; height: 5px; background: var(--progress-bg); border-radius: 5px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
+        .volume-icon { font-size: 1.4rem; color: var(--accent); cursor: pointer; transition: 0.2s; }
+
         .btn-load-music {
-            background-color: var(--btn-load);
-            border: none;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            border-radius: 10px;
-            font-weight: bold;
-            transition: transform 0.2s, filter 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-color: var(--btn-load); border: none; color: white; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.3;
         }
         .btn-load-music:hover { transform: translateY(-2px); filter: brightness(1.1); color: white; }
+        /* Style du sous-titre mis à jour */
+        .btn-load-subtitle { font-size: 0.65rem; font-weight: normal; opacity: 0.85; margin-top: 2px; letter-spacing: 0.5px; }
 
-        .playlist-container {
-            flex-grow: 1; overflow-y: auto; max-height: 480px; background: var(--inner-bg); margin: 15px; border-radius: 12px;
-            scrollbar-width: none;
-        }
+        .playlist-container { flex-grow: 1; overflow-y: auto; max-height: 480px; background: var(--inner-bg); margin: 15px; border-radius: 12px; scrollbar-width: none; }
         .playlist-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
         .playlist-item.active { color: var(--accent); font-weight: bold; background: rgba(26, 188, 156, 0.1); border-left: 4px solid var(--accent); }
 
@@ -82,15 +77,12 @@
         .control-btn:hover { transform: scale(1.1); }
         
         .small-btn { font-size: 1.6rem; color: var(--btn-inactive); margin: 0 15px; position: relative; transition: all 0.3s ease; }
-        .small-btn.active { 
-            color: var(--accent) !important; 
-            filter: drop-shadow(0 0 8px var(--accent));
-        }
+        .small-btn.active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); }
         
         .repeat-one-badge { 
-            font-size: 0.65rem; position: absolute; top: 52%; left: 50%; 
-            transform: translate(-50%, -50%); font-weight: 800; 
-            color: var(--card); pointer-events: none;
+            font-size: 0.6rem; position: absolute; bottom: -2px; right: -6px; background: var(--accent); color: white; 
+            width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; border: 2px solid var(--card); box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -127,7 +119,7 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="d-flex align-items-center justify-content-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center mb-3">
                         <button id="shuffleBtn" class="control-btn small-btn" title="Shuffle"><i class="bi bi-shuffle"></i></button>
                         <button id="prevBtn" class="control-btn"><i class="bi bi-skip-backward-circle-fill"></i></button>
                         <button id="playPauseBtn" class="control-btn mx-3" style="font-size: 3.5rem;"><i id="playIcon" class="bi bi-play-circle-fill"></i></button>
@@ -137,6 +129,12 @@
                             <span id="repeatBadge" class="repeat-one-badge" style="display:none;">1</span>
                         </button>
                     </div>
+
+                    <div class="volume-container">
+                        <i id="volIcon" class="bi bi-volume-up-fill volume-icon"></i>
+                        <input type="range" id="volSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+
                     <div class="eq-container mb-4" id="eqBars"></div>
                 </div>
 
@@ -157,7 +155,10 @@
                 </div>
                 <div id="playlist" class="playlist-container"></div>
                 <div class="p-3 border-top mt-auto">
-                    <label for="fileInput" class="btn-load-music text-center d-block shadow-sm" style="cursor:pointer">LOAD MUSIC</label>
+                    <label for="fileInput" class="btn-load-music text-center d-block shadow-sm" style="cursor:pointer">
+                        <span>LOAD MUSIC</span>
+                        <span class="btn-load-subtitle">MP3, WAV, OGG, M4A, FLAC</span>
+                    </label>
                     <input type="file" id="fileInput" accept="audio/*" multiple class="d-none">
                 </div>
             </div>
@@ -173,13 +174,33 @@
     const playPauseBtn = document.getElementById('playPauseBtn');
     const playIcon = document.getElementById('playIcon');
     const progressFill = document.getElementById('progressFill');
-    const repeatBtn = document.getElementById('repeatBtn');
-    const repeatBadge = document.getElementById('repeatBadge');
-    const shuffleBtn = document.getElementById('shuffleBtn');
+    const volSlider = document.getElementById('volSlider');
+    const volIcon = document.getElementById('volIcon');
     
-    audioEl.volume = 0.05;
-    let playlist = [], currentIndex = 0, isShuffle = false, repeatMode = 0; 
+    let lastVolume = 0.5;
+    audioEl.volume = 0.5;
 
+    function updateVolumeUI(val) {
+        volSlider.value = val;
+        if (val == 0) volIcon.className = "bi bi-volume-mute-fill volume-icon text-danger";
+        else if (val < 0.5) volIcon.className = "bi bi-volume-down-fill volume-icon";
+        else volIcon.className = "bi bi-volume-up-fill volume-icon";
+    }
+
+    volSlider.oninput = (e) => {
+        const val = e.target.value;
+        audioEl.volume = val;
+        if (val > 0) lastVolume = val;
+        updateVolumeUI(val);
+    };
+
+    volIcon.onclick = () => {
+        if (audioEl.volume > 0) { lastVolume = audioEl.volume; audioEl.volume = 0; }
+        else { audioEl.volume = lastVolume || 0.5; }
+        updateVolumeUI(audioEl.volume);
+    };
+
+    let playlist = [], currentIndex = 0, isShuffle = false, repeatMode = 0; 
     let theme = localStorage.getItem('theme') || 'dark';
     let savedGains = JSON.parse(localStorage.getItem('eq-gains') || '[0,0,0,0,0]');
     let audioCtx, source, filters = [], freqs = [60, 250, 1000, 4000, 16000];
@@ -228,24 +249,26 @@
         initAudio();
         currentIndex = index;
         if (audioEl.src) URL.revokeObjectURL(audioEl.src);
-        audioEl.src = URL.createObjectURL(playlist[index]);
-        audioEl.play().catch(() => {});
+        const trackFile = playlist[index];
+        audioEl.src = URL.createObjectURL(trackFile);
+        document.getElementById('metaTitle').innerText = trackFile.name;
+        document.getElementById('metaArtist').innerText = "Unknown Artist";
+        resetArt();
+        audioEl.play().catch(e => console.log("Playback error:", e));
         playIcon.className = "bi bi-pause-circle-fill";
-        
-        jsmediatags.read(playlist[index], {
+        jsmediatags.read(trackFile, {
             onSuccess: (tag) => {
                 const { title, artist, picture } = tag.tags;
-                document.getElementById('metaTitle').innerText = title || playlist[index].name;
-                document.getElementById('metaArtist').innerText = artist || "Unknown Artist";
+                if (title) document.getElementById('metaTitle').innerText = title;
+                if (artist) document.getElementById('metaArtist').innerText = artist;
                 if (picture) {
                     let base64 = "";
                     for (let i = 0; i < picture.data.length; i++) base64 += String.fromCharCode(picture.data[i]);
                     document.getElementById('albumArtImg').src = `data:${picture.format};base64,${window.btoa(base64)}`;
                     document.getElementById('albumArtImg').style.display = 'block';
                     document.getElementById('artIcon').style.display = 'none';
-                } else { resetArt(); }
-            },
-            onError: () => { document.getElementById('metaTitle').innerText = playlist[index].name; resetArt(); }
+                }
+            }
         });
         renderPlaylist();
     }
@@ -288,17 +311,15 @@
     document.getElementById('prevBtn').onclick = () => loadTrack(currentIndex - 1);
     audioEl.onended = () => { if (repeatMode === 1) loadTrack(currentIndex); else handleNext(); };
 
-    shuffleBtn.onclick = () => {
-        isShuffle = !isShuffle;
-        shuffleBtn.classList.toggle('active', isShuffle);
-    };
+    document.getElementById('shuffleBtn').onclick = (e) => { isShuffle = !isShuffle; e.currentTarget.classList.toggle('active', isShuffle); };
 
-    repeatBtn.onclick = () => {
+    document.getElementById('repeatBtn').onclick = () => {
         repeatMode = (repeatMode + 1) % 3;
-        repeatBtn.classList.remove('active');
-        repeatBadge.style.display = 'none';
-        if (repeatMode === 1) { repeatBtn.classList.add('active'); repeatBadge.style.display = 'block'; }
-        else if (repeatMode === 2) { repeatBtn.classList.add('active'); }
+        const btn = document.getElementById('repeatBtn');
+        const badge = document.getElementById('repeatBadge');
+        btn.classList.remove('active'); badge.style.display = 'none';
+        if (repeatMode === 1) { btn.classList.add('active'); badge.style.display = 'flex'; }
+        else if (repeatMode === 2) { btn.classList.add('active'); }
     };
 
     document.getElementById('exportBtn').onclick = () => {
