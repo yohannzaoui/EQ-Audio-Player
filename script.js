@@ -12,7 +12,6 @@ const canvasCtx = canvas.getContext('2d');
 let audioCtx, source, filters = [], playlist = [], currentTrackIndex = -1, previousVolume = 0.7;
 let analyser, dataArray;
 
-// Récupération des préférences
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0;
@@ -117,10 +116,9 @@ function renderPlaylist() {
     ).join('');
 }
 
-// Actions Import/Export
 document.getElementById('exportBtn').onclick = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedGains));
-    const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "eq_pro.json"); dl.click();
+    const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "eq_config.json"); dl.click();
     showToast(translations[lang].expSucc);
 };
 
@@ -139,7 +137,6 @@ document.getElementById('importInput').onchange = e => {
     reader.readAsText(file);
 };
 
-// Raccourcis et Events
 window.addEventListener('keydown', e => {
     if (["INPUT", "SELECT"].includes(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
