@@ -10,9 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div id="toast-container" class="toast-container position-fixed top-0 start-50 translate-middle-x p-3"></div>
-
 <div class="container py-4">
     <div class="row g-4 justify-content-center">
         <div class="col-12 col-lg-7">
@@ -22,18 +20,14 @@
                     <label for="fileInput" class="btn btn-primary btn-sm mb-0 px-3 fw-bold" id="ui-btn-label">Charger</label>
                     <input type="file" id="fileInput" accept="audio/*" class="d-none" multiple>
                 </div>
-
                 <div class="text-center mb-4">
                     <div class="art-wrapper mx-auto mb-3">
                         <img id="albumArt" src="https://cdn-icons-png.flaticon.com/512/3844/3844724.png" alt="Pochette">
                     </div>
                     <canvas id="visualizer"></canvas>
-                    
                     <h5 id="trackTitle" class="mb-1 text-truncate px-3">Prêt à jouer</h5>
                     <p id="trackArtist" class="mb-0 fw-bold text-accent">Artiste</p>
-                    <p id="trackAlbum" class="small opacity-75">Album</p>
                 </div>
-
                 <div class="controls-card p-3 mb-4 rounded bg-secondary bg-opacity-10">
                     <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
                         <div class="d-flex align-items-center gap-2 mx-auto mx-md-0">
@@ -42,13 +36,14 @@
                             <button id="nextBtn" class="btn btn-secondary btn-round btn-nav"><i class="bi bi-skip-end-fill"></i></button>
                         </div>
                         <div class="flex-grow-1 d-flex align-items-center gap-2 px-2" style="min-width: 150px;">
-                            <div id="muteContainer" style="cursor: pointer; padding: 5px;"><i class="bi bi-volume-up-fill" id="muteIcon" style="font-size: 1.3rem;"></i></div>
+                            <div id="muteBtn" style="cursor: pointer; padding: 5px;">
+                                <i class="bi bi-volume-up-fill" id="muteIcon" style="font-size: 1.3rem;"></i>
+                            </div>
                             <input type="range" id="volSlider" class="form-range" min="0" max="1" step="0.01" value="0.7">
                         </div>
                         <button id="loopToggle" class="btn btn-outline-secondary btn-round mx-auto mx-md-0"><i id="loopIcon" class="bi bi-repeat"></i></button>
                     </div>
                 </div>
-
                 <div class="mb-4">
                     <input type="range" id="progressSlider" class="form-range" min="0" max="100" value="0">
                     <div class="d-flex justify-content-between small fw-bold mt-1">
@@ -56,7 +51,6 @@
                         <span id="durationTime">0:00</span>
                     </div>
                 </div>
-
                 <div class="eq-grid mb-4 p-3 rounded bg-light bg-opacity-10">
                     <div class="eq-item"><span class="db-txt" id="db0">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="0"><span>60Hz</span></div>
                     <div class="eq-item"><span class="db-txt" id="db1">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="1"><span>250Hz</span></div>
@@ -64,16 +58,14 @@
                     <div class="eq-item"><span class="db-txt" id="db3">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="3"><span>4kHz</span></div>
                     <div class="eq-item"><span class="db-txt" id="db4">0dB</span><input type="range" class="vert-range" min="-20" max="20" value="0" data-index="4"><span>16kHz</span></div>
                 </div>
-
                 <div class="d-flex flex-wrap gap-2 justify-content-center pt-3 border-top">
                     <button id="exportBtn" class="btn btn-outline-success btn-sm fw-bold">Export EQ</button>
-                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0 fw-bold" id="ui-import-label">Import EQ</label>
+                    <label for="importInput" class="btn btn-outline-info btn-sm mb-0 fw-bold">Import EQ</label>
                     <input type="file" id="importInput" accept=".json" class="d-none">
-                    <button id="resetEqBtn" class="btn btn-outline-danger btn-sm fw-bold">Réinitialiser EQ</button>
+                    <button id="resetEqBtn" class="btn btn-outline-danger btn-sm fw-bold">Reset</button>
                 </div>
             </div>
         </div>
-
         <div class="col-12 col-lg-4 d-flex flex-column gap-3">
             <div class="card p-3 shadow-lg border-0 flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -82,7 +74,6 @@
                 </div>
                 <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 550px;"></div>
             </div>
-
             <div class="card p-2 shadow-sm border-0 flex-row justify-content-center align-items-center gap-3 px-3">
                 <select id="langSelect" class="form-select form-select-sm w-auto fw-bold">
                     <option value="fr">FR</option>
