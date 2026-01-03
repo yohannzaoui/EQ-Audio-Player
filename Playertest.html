@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecteur Audio Multi-Formats</title>
+    <title>Lecteur Audio Hi-Fi</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -11,7 +11,6 @@
             --container-bg: #ffffff;
             --accent-color: #007bff;
             --secondary-bg: #e4e6eb;
-            --progress-color: #007bff;
         }
 
         body.dark-theme {
@@ -20,19 +19,18 @@
             --container-bg: #242526;
             --accent-color: #4599ff;
             --secondary-bg: #3a3b3c;
-            --progress-color: #4599ff;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            transition: background-color 0.3s ease;
+            transition: 0.3s;
         }
 
         .player-container {
@@ -40,64 +38,54 @@
             padding: 2rem;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
             width: 380px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
         }
 
         #track-name {
-            font-size: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--accent-color);
             margin: 10px 0;
-            height: 1.2rem;
-            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: var(--accent-color);
+            white-space: nowrap;
         }
 
-        /* Barre de progression */
-        .progress-container {
-            width: 100%;
-            margin: 15px 0;
+        .progress-container { margin: 15px 0; }
+        #seek-bar { width: 100%; accent-color: var(--accent-color); }
+        .time-info { display: flex; justify-content: space-between; font-size: 0.75rem; }
+
+        .eq-container {
+            background: var(--secondary-bg);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
         }
 
-        #seek-bar {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            accent-color: var(--progress-color);
-        }
-
-        .time-info {
+        .eq-row {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .main-btns {
-            display: flex;
-            justify-content: center;
+            align-items: center;
             gap: 10px;
+            margin: 10px 0;
+            font-size: 0.85rem;
         }
 
+        .eq-row input { flex: 1; accent-color: #28a745; }
+
+        .controls { display: flex; flex-direction: column; gap: 15px; }
+        .main-btns { display: flex; justify-content: center; }
+        
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             cursor: pointer;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             background: var(--accent-color);
             color: white;
             font-weight: bold;
@@ -105,30 +93,13 @@
 
         .file-label {
             background: var(--secondary-bg);
-            color: var(--text-color);
             padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--secondary-bg);
-            padding: 8px 15px;
-            border-radius: 10px;
-        }
-
-        #theme-btn {
-            background: none;
-            border: 1px solid var(--text-color);
-            color: var(--text-color);
-            font-size: 0.7rem;
-            padding: 4px 8px;
-        }
-
+        #theme-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 0.7rem; }
         input[type="file"] { display: none; }
     </style>
 </head>
@@ -137,12 +108,12 @@
     <div class="player-container">
         <div class="header">
             <button id="theme-btn">Thème</button>
-            <label for="file-upload" class="file-label">📂 Importer Audio</label>
+            <label for="file-upload" class="file-label">📁 Importer</label>
             <input id="file-upload" type="file" accept=".mp3, .flac, .aac, .ogg, .wav, .m4a">
         </div>
-        
-        <h3 id="track-name">En attente de fichier...</h3>
-        
+
+        <h3 id="track-name">Choisissez un fichier</h3>
+
         <div class="progress-container">
             <input type="range" id="seek-bar" value="0" min="0" step="0.1">
             <div class="time-info">
@@ -151,17 +122,27 @@
             </div>
         </div>
 
-        <audio id="audio-player"></audio>
-        
+        <div class="eq-container">
+            <div class="eq-row">
+                <span>Basses</span>
+                <input type="range" id="bass-slider" min="-20" max="20" value="0" step="1">
+            </div>
+            <div class="eq-row">
+                <span>Aigus</span>
+                <input type="range" id="treble-slider" min="-20" max="20" value="0" step="1">
+            </div>
+        </div>
+
+        <audio id="audio-player" crossorigin="anonymous"></audio>
+
         <div class="controls">
             <div class="main-btns">
                 <button id="play-pause">Lecture</button>
             </div>
             
-            <div class="volume-control">
-                <span>🔈</span>
+            <div class="eq-row" style="background: var(--secondary-bg); padding: 8px; border-radius: 10px;">
+                <span>Vol</span>
                 <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
-                <span>🔊</span>
             </div>
         </div>
     </div>
@@ -171,69 +152,63 @@
         const playBtn = document.getElementById('play-pause');
         const volumeSlider = document.getElementById('volume-slider');
         const seekBar = document.getElementById('seek-bar');
-        const currentTimeEl = document.getElementById('current-time');
-        const durationEl = document.getElementById('duration');
-        const trackName = document.getElementById('track-name');
-        const fileInput = document.getElementById('file-upload');
         const themeBtn = document.getElementById('theme-btn');
-        const body = document.body;
+        const fileInput = document.getElementById('file-upload');
+        
+        // Noeuds Audio
+        let audioCtx;
+        let bassFilter;
+        let trebleFilter;
+        let source;
 
-        // --- FORMATAGE DU TEMPS ---
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        // --- INITIALISATION AUDIO CONTEXT ---
+        function initAudioContext() {
+            if (audioCtx) return;
+
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            source = audioCtx.createMediaElementSource(audio);
+
+            // Filtre Basses (Low Shelf)
+            bassFilter = audioCtx.createBiquadFilter();
+            bassFilter.type = "lowshelf";
+            bassFilter.frequency.value = 200; // Fréquence limite des basses
+
+            // Filtre Aigus (High Shelf)
+            trebleFilter = audioCtx.createBiquadFilter();
+            trebleFilter.type = "highshelf";
+            trebleFilter.frequency.value = 3000; // Fréquence limite des aigus
+
+            // Chaînage : Source -> Basses -> Aigus -> Sortie
+            source.connect(bassFilter);
+            bassFilter.connect(trebleFilter);
+            trebleFilter.connect(audioCtx.destination);
         }
 
-        // --- GESTION DES FICHIERS ---
+        // --- GESTION ÉGALISEUR ---
+        document.getElementById('bass-slider').addEventListener('input', (e) => {
+            if (bassFilter) bassFilter.gain.value = e.target.value;
+        });
+
+        document.getElementById('treble-slider').addEventListener('input', (e) => {
+            if (trebleFilter) trebleFilter.gain.value = e.target.value;
+        });
+
+        // --- LOGIQUE LECTEUR ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                initAudioContext(); // Initialise au premier chargement
                 audio.src = URL.createObjectURL(file);
-                trackName.textContent = file.name;
+                document.getElementById('track-name').textContent = file.name;
                 audio.play();
                 playBtn.textContent = 'Pause';
+                if (audioCtx.state === 'suspended') audioCtx.resume();
             }
         });
 
-        // --- BARRE DE PROGRESSION ---
-        audio.addEventListener('loadedmetadata', () => {
-            seekBar.max = audio.duration;
-            durationEl.textContent = formatTime(audio.duration);
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            seekBar.value = audio.currentTime;
-            currentTimeEl.textContent = formatTime(audio.currentTime);
-        });
-
-        seekBar.addEventListener('input', () => {
-            audio.currentTime = seekBar.value;
-        });
-
-        // --- PERSISTANCE & PRÉFÉRENCES ---
-        function saveSettings() {
-            localStorage.setItem('playerPrefs', JSON.stringify({
-                theme: body.classList.contains('dark-theme') ? 'dark' : 'light',
-                volume: audio.volume
-            }));
-        }
-
-        function loadSettings() {
-            const prefs = JSON.parse(localStorage.getItem('playerPrefs'));
-            if (prefs) {
-                if (prefs.theme === 'dark') {
-                    body.classList.add('dark-theme');
-                    themeBtn.textContent = 'Mode Clair';
-                }
-                audio.volume = prefs.volume;
-                volumeSlider.value = prefs.volume;
-            }
-        }
-
-        // --- BOUTONS ---
         playBtn.addEventListener('click', () => {
             if (!audio.src) return;
+            initAudioContext();
             if (audio.paused) {
                 audio.play();
                 playBtn.textContent = 'Pause';
@@ -243,18 +218,52 @@
             }
         });
 
+        // Mise à jour barre de progression
+        audio.addEventListener('timeupdate', () => {
+            seekBar.value = audio.currentTime;
+            document.getElementById('current-time').textContent = formatTime(audio.currentTime);
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            seekBar.max = audio.duration;
+            document.getElementById('duration').textContent = formatTime(audio.duration);
+        });
+
+        seekBar.addEventListener('input', () => audio.currentTime = seekBar.value);
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // --- PRÉFÉRENCES ---
+        function saveSettings() {
+            localStorage.setItem('audioPrefs', JSON.stringify({
+                theme: document.body.className,
+                volume: audio.volume
+            }));
+        }
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            themeBtn.textContent = document.body.classList.contains('dark-theme') ? 'Mode Clair' : 'Mode Sombre';
+            saveSettings();
+        });
+
         volumeSlider.addEventListener('input', (e) => {
             audio.volume = e.target.value;
             saveSettings();
         });
 
-        themeBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-theme');
-            themeBtn.textContent = body.classList.contains('dark-theme') ? 'Mode Clair' : 'Mode Sombre';
-            saveSettings();
-        });
-
-        window.addEventListener('DOMContentLoaded', loadSettings);
+        window.onload = () => {
+            const prefs = JSON.parse(localStorage.getItem('audioPrefs'));
+            if (prefs) {
+                document.body.className = prefs.theme;
+                audio.volume = prefs.volume;
+                volumeSlider.value = prefs.volume;
+            }
+        };
     </script>
 </body>
 </html>
