@@ -3,144 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecteur Audio Hi-Fi Pro</title>
+    <title>Lecteur Audio Hi-Fi Bootstrap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --text-color: #1c1e21;
-            --container-bg: #ffffff;
-            --accent-color: #007bff;
-            --secondary-bg: #e4e6eb;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #212529;
         }
 
         body.dark-theme {
-            --bg-color: #18191a;
-            --text-color: #e4e6eb;
-            --container-bg: #242526;
-            --accent-color: #4599ff;
-            --secondary-bg: #3a3b3c;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f8f9fa;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            color: var(--text-main);
+            transition: all 0.3s ease;
             min-height: 100vh;
-            margin: 0;
-            transition: 0.3s;
-        }
-
-        .player-container {
-            background: var(--container-bg);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            width: 380px;
-        }
-
-        .header {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
             align-items: center;
+        }
+
+        .player-card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            max-width: 450px;
+            margin: auto;
         }
 
         #track-name {
-            font-size: 0.9rem;
-            text-align: center;
-            color: var(--accent-color);
-            margin: 10px 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-weight: 600;
+            color: var(--text-main);
         }
 
-        .progress-container { margin: 15px 0; }
-        #seek-bar { width: 100%; accent-color: var(--accent-color); }
-        .time-info { display: flex; justify-content: space-between; font-size: 0.75rem; }
-
-        .eq-container {
-            background: var(--secondary-bg);
+        .eq-section {
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 15px;
             padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
         }
 
-        .eq-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-            font-size: 0.85rem;
-        }
-
-        .eq-row input { flex: 1; accent-color: #28a745; }
-
-        .controls { display: flex; flex-direction: column; gap: 15px; }
+        .form-range::-webkit-slider-thumb { background: #0d6efd; }
         
-        button {
-            padding: 12px 25px;
-            cursor: pointer;
-            border: none;
-            border-radius: 10px;
-            background: var(--accent-color);
-            color: white;
-            font-weight: bold;
+        .btn-theme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
         }
-
-        .file-label {
-            background: var(--secondary-bg);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        #theme-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 0.7rem; padding: 5px; }
-        input[type="file"] { display: none; }
     </style>
 </head>
 <body class="light-theme">
 
-    <div class="player-container">
-        <div class="header">
-            <button id="theme-btn">Thème</button>
-            <label for="file-upload" class="file-label">📁 Importer Audio</label>
-            <input id="file-upload" type="file" accept=".mp3, .flac, .aac, .ogg, .wav, .m4a">
-        </div>
+    <button id="theme-btn" class="btn btn-outline-secondary btn-sm btn-theme">
+        <i class="bi bi-moon-stars"></i>
+    </button>
 
-        <h3 id="track-name">Aucun fichier</h3>
-
-        <div class="progress-container">
-            <input type="range" id="seek-bar" value="0" min="0" step="0.1">
-            <div class="time-info">
-                <span id="current-time">0:00</span>
-                <span id="duration">0:00</span>
+    <div class="container">
+        <div class="card player-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0"><i class="bi bi-music-note-beamed me-2 text-primary"></i>Lecteur Pro</h5>
+                <label for="file-upload" class="btn btn-primary btn-sm rounded-pill px-3">
+                    <i class="bi bi-folder2-open me-1"></i> Importer
+                </label>
+                <input id="file-upload" type="file" accept=".mp3, .flac, .aac, .ogg, .wav, .m4a" class="d-none">
             </div>
-        </div>
 
-        <div class="eq-container">
-            <div class="eq-row">
-                <span>Basses</span>
-                <input type="range" id="bass-slider" min="-20" max="20" value="0" step="1">
+            <div id="track-name" class="text-center mb-3 text-truncate">Aucun fichier sélectionné</div>
+
+            <div class="px-2">
+                <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1">
+                <div class="d-flex justify-content-between small opacity-75">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
             </div>
-            <div class="eq-row">
-                <span>Aigus</span>
-                <input type="range" id="treble-slider" min="-20" max="20" value="0" step="1">
+
+            <div class="eq-section my-4">
+                <div class="row align-items-center mb-2">
+                    <div class="col-3 small fw-bold">Basses</div>
+                    <div class="col-9">
+                        <input type="range" id="bass-slider" class="form-range" min="-20" max="20" value="0" step="1">
+                    </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-3 small fw-bold">Aigus</div>
+                    <div class="col-9">
+                        <input type="range" id="treble-slider" class="form-range" min="-20" max="20" value="0" step="1">
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <audio id="audio-player" crossorigin="anonymous"></audio>
+            <audio id="audio-player" crossorigin="anonymous"></audio>
 
-        <div class="controls">
-            <button id="play-pause">Lecture</button>
-            
-            <div class="eq-row" style="background: var(--secondary-bg); padding: 8px; border-radius: 10px;">
-                <span>Volume</span>
-                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+            <div class="d-flex flex-column gap-3">
+                <button id="play-pause" class="btn btn-primary btn-lg rounded-pill w-100 py-2 shadow-sm">
+                    <i class="bi bi-play-fill"></i> Lecture
+                </button>
+                
+                <div class="d-flex align-items-center gap-3 bg-light p-2 rounded-pill dark-theme-ignore" style="background-color: rgba(0,0,0,0.05) !important;">
+                    <i class="bi bi-volume-down-fill ms-2"></i>
+                    <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0.5">
+                    <i class="bi bi-volume-up-fill me-2"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -154,68 +124,39 @@
         const fileInput = document.getElementById('file-upload');
         const bassSlider = document.getElementById('bass-slider');
         const trebleSlider = document.getElementById('treble-slider');
-        
+        const trackNameEl = document.getElementById('track-name');
+
         let audioCtx, bassFilter, trebleFilter, gainNode, source;
 
-        // --- INITIALISATION CHAINE AUDIO ---
         function initAudioContext() {
             if (audioCtx) return;
-
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             source = audioCtx.createMediaElementSource(audio);
-
-            // 1. Gain Node pour le volume
+            
             gainNode = audioCtx.createGain();
             gainNode.gain.value = volumeSlider.value;
 
-            // 2. Filtre Basses
             bassFilter = audioCtx.createBiquadFilter();
             bassFilter.type = "lowshelf";
             bassFilter.frequency.value = 200;
-            bassFilter.gain.value = 0; // Forcé à 0
+            bassFilter.gain.value = 0;
 
-            // 3. Filtre Aigus
             trebleFilter = audioCtx.createBiquadFilter();
             trebleFilter.type = "highshelf";
             trebleFilter.frequency.value = 3000;
-            trebleFilter.gain.value = 0; // Forcé à 0
+            trebleFilter.gain.value = 0;
 
-            // Chaînage : Source -> Basses -> Aigus -> Volume -> Sortie
-            source.connect(bassFilter);
-            bassFilter.connect(trebleFilter);
-            trebleFilter.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            source.connect(bassFilter).connect(trebleFilter).connect(gainNode).connect(audioCtx.destination);
         }
 
-        // --- ÉCOUTEURS ÉGALISEUR ---
-        bassSlider.addEventListener('input', (e) => {
-            if (bassFilter) bassFilter.gain.value = e.target.value;
-        });
-
-        trebleSlider.addEventListener('input', (e) => {
-            if (trebleFilter) trebleFilter.gain.value = e.target.value;
-        });
-
-        // --- ÉCOUTEUR VOLUME (CORRIGÉ) ---
-        volumeSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            if (gainNode) {
-                gainNode.gain.value = val;
-            }
-            audio.volume = val; // Mise à jour parallèle pour la sécurité
-            saveSettings();
-        });
-
-        // --- LOGIQUE FICHIERS ---
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 initAudioContext();
                 audio.src = URL.createObjectURL(file);
-                document.getElementById('track-name').textContent = file.name;
+                trackNameEl.textContent = file.name;
                 audio.play();
-                playBtn.textContent = 'Pause';
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                updatePlayIcon(true);
             }
         });
 
@@ -224,24 +165,38 @@
             initAudioContext();
             if (audio.paused) {
                 audio.play();
-                playBtn.textContent = 'Pause';
+                updatePlayIcon(true);
             } else {
                 audio.pause();
-                playBtn.textContent = 'Lecture';
+                updatePlayIcon(false);
             }
         });
 
-        // Progression
+        function updatePlayIcon(isPlaying) {
+            playBtn.innerHTML = isPlaying ? '<i class="bi bi-pause-fill"></i> Pause' : '<i class="bi bi-play-fill"></i> Lecture';
+        }
+
+        // Volume (Corrected with gainNode)
+        volumeSlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (gainNode) gainNode.gain.value = val;
+            audio.volume = val;
+            saveSettings();
+        });
+
+        // EQ Listeners
+        bassSlider.addEventListener('input', (e) => { if (bassFilter) bassFilter.gain.value = e.target.value; });
+        trebleSlider.addEventListener('input', (e) => { if (trebleFilter) trebleFilter.gain.value = e.target.value; });
+
+        // Time updates
         audio.addEventListener('timeupdate', () => {
             seekBar.value = audio.currentTime;
             document.getElementById('current-time').textContent = formatTime(audio.currentTime);
         });
-
         audio.addEventListener('loadedmetadata', () => {
             seekBar.max = audio.duration;
             document.getElementById('duration').textContent = formatTime(audio.duration);
         });
-
         seekBar.addEventListener('input', () => audio.currentTime = seekBar.value);
 
         function formatTime(s) {
@@ -250,9 +205,9 @@
             return `${m}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // --- THÈME & PERSISTANCE ---
+        // Theme & Persistance
         function saveSettings() {
-            localStorage.setItem('audioPrefs_v2', JSON.stringify({
+            localStorage.setItem('audioPrefs_bootstrap', JSON.stringify({
                 theme: document.body.classList.contains('dark-theme') ? 'dark' : 'light',
                 volume: volumeSlider.value
             }));
@@ -260,20 +215,19 @@
 
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
-            themeBtn.textContent = document.body.classList.contains('dark-theme') ? 'Mode Clair' : 'Mode Sombre';
+            const isDark = document.body.classList.contains('dark-theme');
+            themeBtn.innerHTML = isDark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
             saveSettings();
         });
 
         window.onload = () => {
-            // Reset forcé des curseurs EQ à 0 au chargement
             bassSlider.value = 0;
             trebleSlider.value = 0;
-
-            const prefs = JSON.parse(localStorage.getItem('audioPrefs_v2'));
+            const prefs = JSON.parse(localStorage.getItem('audioPrefs_bootstrap'));
             if (prefs) {
                 if (prefs.theme === 'dark') {
                     document.body.classList.add('dark-theme');
-                    themeBtn.textContent = 'Mode Clair';
+                    themeBtn.innerHTML = '<i class="bi bi-sun"></i>';
                 }
                 volumeSlider.value = prefs.volume;
                 audio.volume = prefs.volume;
