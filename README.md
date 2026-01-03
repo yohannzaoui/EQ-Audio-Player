@@ -1,48 +1,75 @@
-# EQ Audio Player 🎧
-
-**EQ Audio Player** is a modern, sleek, and high-performance web audio player. It offers a personalized listening experience through an integrated 5-band equalizer, dynamic playlist management, and automatic preference saving.
-
-## ✨ Key Features
-
-### 🎵 Playback & Navigation
-- **Comprehensive Controls**: Play, pause, next, and previous.
-- **Smart Navigation**: The "Previous" button restarts the song if it has been playing for more than 3 seconds; otherwise, it jumps to the previous track.
-- **3-State Repeat Mode**: 
-  - ⚪ Disabled (Sequential playback).
-  - 🔁 Repeat All (Loop entire playlist).
-  - 🔂 Repeat One (Loop current track).
-
-### 🎚️ Audio Equalizer (Web Audio API)
-- **5 Frequency Bands**: 60Hz, 250Hz, 1kHz, 4kHz, 16kHz.
-- **Precise Tuning**: Gain adjustment from -20dB to +20dB per band.
-- **Quick Reset**: One-click button to reset all gains to 0dB.
-
-### 📋 Playlist Management
-- **Bulk Loading**: Upload multiple audio files at once.
-- **Metadata Support**: Automatic display of title, artist, and album art (powered by `jsmediatags`).
-- **Responsive UI**: Scrollable playlist with a clear visual indicator for the currently playing track.
-
-### ⚙️ Customization & Persistence
-- **Themes**: Toggle between Dark and Light modes.
-- **Localization**: Interface available in English and French.
-- **Auto-Save**: Equalizer gains, volume level, language, and theme are automatically saved in your browser's `LocalStorage`.
-- **Export/Import**: Save your custom EQ configurations to a `.json` file and restore them anytime.
-
-## 🚀 Quick Setup
-
-1. **Download/Clone** the project files (`index.html`, `style.css`, `script.js`).
-2. **Add a Favicon**: Save your icon as `favicon.ico` in the project's root folder.
-3. **Launch the App**: Simply open `index.html` in your web browser.
-
-> **Note**: Due to browser security policies (CORS), importing JSON files or accessing certain audio features may require a local server (e.g., using the "Live Server" extension in VS Code).
-
-## 🛠️ Built With
-
-- **HTML5 / CSS3**: Custom structure and styling.
-- **Bootstrap 5 & Icons**: Responsive layout framework.
-- **Vanilla JavaScript**: Core application logic.
-- **Web Audio API**: Real-time audio processing and equalization.
-- **jsmediatags**: Metadata extraction from MP3/FLAC files.
 
 ---
-Crafted for a superior audio experience.
+
+# EQ Audio Payer - Features Documentation
+
+**EQ Audio Payer** is a professional-grade, web-based music player featuring a real-time 5-band equalizer, theme persistence, and advanced playlist management.
+
+## 🚀 Key Features
+
+### 1. High-Fidelity Audio Engine
+
+* **Web Audio API Integration:** Uses a professional audio context for real-time signal processing.
+* **5-Band Graphic Equalizer:** Fine-tune your sound across five specific frequencies:
+* **60Hz** (Sub-Bass)
+* **250Hz** (Low-Mid)
+* **1kHz** (Mid-Range)
+* **4kHz** (Presence/High-Mid)
+* **16kHz** (Brilliance/Air)
+
+
+* **Gain Control:** Each band allows for a range of **-20dB to +20dB**.
+
+### 2. Smart Metadata & Visuals
+
+* **Format Detection:** Automatic detection and display of file extensions (MP3, WAV, OGG, M4A, FLAC).
+* **ID3 Tag Parsing:** Automatically extracts Song Title, Artist Name, and Album Art directly from the audio files using `jsmediatags`.
+* **Dynamic UI:** If no album art is found, the player displays a minimalist music icon.
+
+### 3. Advanced Playback Controls
+
+* **Loop Modes:**
+* **Standard:** Plays through the list.
+* **Repeat One:** Loops the current track (indicated by a "1" badge).
+* **Repeat All:** Loops the entire library.
+
+
+* **Shuffle:** Randomizes the playback order.
+* **Smart Volume:** Includes a mute/unmute toggle by clicking the volume icon and remembers your last volume level.
+
+### 4. Library & Settings Management
+
+* **Bulk Loading:** Import multiple tracks at once via the "LOAD MUSIC" button.
+* **Persistent Theme:** Remembers your preference between **Dark Mode** and **Light Mode** using browser local storage.
+* **EQ Portability:**
+* **Export:** Save your custom EQ settings as a `.json` file.
+* **Import:** Load previously saved EQ configurations.
+* **Reset:** Instantly return to a "Flat" (0dB) frequency response.
+
+
+
+---
+
+## 🛠 Technical Specifications
+
+| Feature | Description |
+| --- | --- |
+| **Application Name** | **EQ Audio Payer** |
+| **Frontend Framework** | Bootstrap 5.3.0 (CSS) |
+| **Icons** | Bootstrap Icons |
+| **Storage** | `localStorage` for Theme and EQ gains |
+| **Audio Processing** | `BiquadFilterNode` (Peaking type) |
+| **Supported Formats** | MP3, WAV, OGG, M4A, FLAC |
+
+---
+
+## 🎹 Interaction & Shortcuts
+
+* **Seek:** Click anywhere on the progress bar to jump to a specific time.
+* **Volume:** Drag the volume slider for precise adjustment.
+* **Library:** Click any track in the "My Library" panel to play it immediately.
+* **Auto-Save:** Your language and theme preferences are automatically saved for your next session.
+
+---
+
+**Developed by:** Yohann Zaoui
