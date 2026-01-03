@@ -46,6 +46,16 @@
             padding: 25px; border-radius: 15px; text-align: left;
             display: flex; flex-direction: column; justify-content: center;
             height: 200px; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        /* --- AJOUT DU STYLE DU TAG --- */
+        #formatTag {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0,0,0,0.2); padding: 2px 8px;
+            border-radius: 4px; font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
         }
 
         .progress-wrapper { width: 100%; margin-bottom: 20px; }
@@ -63,7 +73,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.3;
         }
         .btn-load-music:hover { transform: translateY(-2px); filter: brightness(1.1); color: white; }
-        /* Style du sous-titre mis à jour */
         .btn-load-subtitle { font-size: 0.65rem; font-weight: normal; opacity: 0.85; margin-top: 2px; letter-spacing: 0.5px; }
 
         .playlist-container { flex-grow: 1; overflow-y: auto; max-height: 480px; background: var(--inner-bg); margin: 15px; border-radius: 12px; scrollbar-width: none; }
@@ -77,7 +86,6 @@
 
         .control-btn { font-size: 2.5rem; color: var(--accent); background: none; border: none; transition: 0.2s; padding: 0; line-height: 1; vertical-align: middle; }
         .control-btn:hover { transform: scale(1.1); }
-        
         .small-btn { font-size: 1.6rem; color: var(--btn-inactive); margin: 0 15px; position: relative; transition: all 0.3s ease; }
         .small-btn.active { color: var(--accent) !important; filter: drop-shadow(0 0 8px var(--accent)); }
         
@@ -105,6 +113,7 @@
                         <i id="artIcon" class="bi bi-music-note-beamed"></i>
                     </div>
                     <div class="now-playing-info shadow-sm">
+                        <div id="formatTag" style="display:none;">---</div>
                         <div class="fw-bold text-truncate fs-4 mb-1" id="metaTitle">No track selected</div>
                         <div class="fs-6 opacity-80 text-truncate" id="metaArtist">Please load your music</div>
                     </div>
@@ -178,6 +187,7 @@
     const progressFill = document.getElementById('progressFill');
     const volSlider = document.getElementById('volSlider');
     const volIcon = document.getElementById('volIcon');
+    const formatTag = document.getElementById('formatTag');
     
     let lastVolume = 0.5;
     audioEl.volume = 0.5;
@@ -253,6 +263,12 @@
         if (audioEl.src) URL.revokeObjectURL(audioEl.src);
         const trackFile = playlist[index];
         audioEl.src = URL.createObjectURL(trackFile);
+        
+        // --- MISE À JOUR DU TAG ---
+        const ext = trackFile.name.split('.').pop().toUpperCase();
+        formatTag.innerText = ext;
+        formatTag.style.display = 'block';
+
         document.getElementById('metaTitle').innerText = trackFile.name;
         document.getElementById('metaArtist').innerText = "Unknown Artist";
         resetArt();
@@ -364,7 +380,11 @@
     };
 
     document.getElementById('clearBtn').onclick = () => {
-        if(confirm("Clear library?")) { playlist = []; currentIndex = 0; audioEl.pause(); audioEl.src = ""; renderPlaylist(); resetArt(); }
+        if(confirm("Clear library?")) { 
+            playlist = []; currentIndex = 0; audioEl.pause(); audioEl.src = ""; 
+            formatTag.style.display = 'none'; // Cacher le tag
+            renderPlaylist(); resetArt(); 
+        }
     };
 
     function renderPlaylist() {
