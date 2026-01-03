@@ -74,19 +74,22 @@
         </div>
 
         <div class="col-12 col-lg-4 d-flex flex-column gap-3">
-            <div class="card p-2 shadow-sm border-0 flex-row justify-content-center align-items-center gap-3 px-3">
-                <select id="langSelect" class="form-select form-select-sm w-auto fw-bold">
-                    <option value="fr">FR</option>
-                    <option value="en">EN</option>
-                </select>
-                <button id="themeToggle" class="btn btn-outline-secondary btn-sm"><i id="themeIcon" class="bi bi-moon-stars-fill"></i></button>
-            </div>
             <div class="card p-3 shadow-lg border-0 flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0" id="ui-playlist-title">Playlist</h6>
                     <button id="clearPlaylistBtn" class="btn btn-sm text-danger p-0 fw-bold">Vider</button>
                 </div>
-                <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 540px;"></div>
+                <div id="playlistContainer" class="list-group list-group-flush overflow-auto" style="max-height: 580px;"></div>
+            </div>
+
+            <div class="card p-2 shadow-sm border-0 flex-row justify-content-center align-items-center gap-3 px-3">
+                <select id="langSelect" class="form-select form-select-sm w-auto fw-bold">
+                    <option value="fr">FR</option>
+                    <option value="en">EN</option>
+                </select>
+                <button id="themeToggle" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+                </button>
             </div>
         </div>
     </div>
