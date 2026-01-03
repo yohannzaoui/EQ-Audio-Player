@@ -12,6 +12,7 @@ const canvasCtx = canvas.getContext('2d');
 let audioCtx, source, filters = [], playlist = [], currentTrackIndex = -1, previousVolume = 0.7;
 let analyser, dataArray;
 
+// Récupération des préférences
 let theme = localStorage.getItem('theme') || 'dark';
 let lang = localStorage.getItem('lang') || 'fr';
 let loopState = parseInt(localStorage.getItem('eq-loop-state')) || 0;
@@ -63,11 +64,15 @@ function updateUI() {
 }
 
 function initAudio() {
-    if (audioCtx) return;
+    if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+    }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     source = audioCtx.createMediaElementSource(audioEl);
+    
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64;
+    analyser.fftSize = 64; 
     dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     let lastNode = source;
@@ -76,6 +81,7 @@ function initAudio() {
         filter.type = "peaking"; filter.frequency.value = f; filter.gain.value = savedGains[i];
         lastNode.connect(filter); lastNode = filter; filters.push(filter);
     });
+    
     lastNode.connect(analyser);
     analyser.connect(audioCtx.destination);
     drawVisualizer();
@@ -83,15 +89,18 @@ function initAudio() {
 
 function drawVisualizer() {
     requestAnimationFrame(drawVisualizer);
+    if (!analyser) return;
     analyser.getByteFrequencyData(dataArray);
+
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    const barWidth = (canvas.width / dataArray.length) * 2.5;
+    const barWidth = (canvas.width / dataArray.length) * 2;
     let x = 0;
-    for(let i = 0; i < dataArray.length; i++) {
+
+    for (let i = 0; i < dataArray.length; i++) {
         const barHeight = dataArray[i] / 4;
-        canvasCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-color');
+        canvasCtx.fillStyle = "#1abc9c"; // Couleur fixe pour test
         canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 2;
+        x += barWidth + 1;
     }
 }
 
@@ -101,7 +110,7 @@ function loadTrack(index) {
     const file = playlist[index];
     initAudio();
     audioEl.src = URL.createObjectURL(file);
-    audioEl.play().catch(() => {});
+    audioEl.play().then(() => { if(audioCtx.state === 'suspended') audioCtx.resume(); });
     document.getElementById('trackTitle').innerText = file.name;
     renderPlaylist();
     updateUI();
@@ -116,9 +125,10 @@ function renderPlaylist() {
     ).join('');
 }
 
+// Actions Import/Export
 document.getElementById('exportBtn').onclick = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedGains));
-    const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "eq_config.json"); dl.click();
+    const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "eq_settings.json"); dl.click();
     showToast(translations[lang].expSucc);
 };
 
@@ -137,23 +147,31 @@ document.getElementById('importInput').onchange = e => {
     reader.readAsText(file);
 };
 
+// Raccourcis et Events
 window.addEventListener('keydown', e => {
     if (["INPUT", "SELECT"].includes(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
-    if (e.code === 'ArrowRight') { e.preventDefault(); document.getElementById('nextBtn').click(); }
-    if (e.code === 'ArrowLeft') { e.preventDefault(); document.getElementById('prevBtn').click(); }
-    if (e.code === 'ArrowUp') { e.preventDefault(); audioEl.volume = Math.min(1, audioEl.volume + 0.05); updateUI(); }
-    if (e.code === 'ArrowDown') { e.preventDefault(); audioEl.volume = Math.max(0, audioEl.volume - 0.05); updateUI(); }
 });
 
 document.getElementById('resetEqBtn').onclick = () => { savedGains = [0,0,0,0,0]; localStorage.setItem('eq-gains', JSON.stringify(savedGains)); updateUI(); showToast(translations[lang].resetSucc); };
 document.getElementById('themeToggle').onclick = () => { theme = (theme === 'dark' ? 'light' : 'dark'); localStorage.setItem('theme', theme); updateUI(); };
 document.getElementById('langSelect').onchange = e => { lang = e.target.value; localStorage.setItem('lang', lang); updateUI(); };
-playBtn.onclick = () => { if (audioEl.src) audioEl.paused ? audioEl.play() : audioEl.pause(); };
-document.getElementById('fileInput').onchange = e => { playlist = [...playlist, ...Array.from(e.target.files)]; renderPlaylist(); if (currentTrackIndex === -1) loadTrack(0); };
+
+playBtn.onclick = () => { 
+    if (!audioEl.src) return; 
+    initAudio(); 
+    audioEl.paused ? audioEl.play() : audioEl.pause(); 
+};
+
+document.getElementById('fileInput').onchange = e => { 
+    playlist = [...playlist, ...Array.from(e.target.files)]; 
+    renderPlaylist(); 
+    if (currentTrackIndex === -1) loadTrack(0); 
+};
 document.getElementById('nextBtn').onclick = () => { if (currentTrackIndex < playlist.length - 1) loadTrack(currentTrackIndex + 1); };
 document.getElementById('prevBtn').onclick = () => { if (currentTrackIndex > 0) loadTrack(currentTrackIndex - 1); };
 document.getElementById('loopToggle').onclick = () => { loopState = (loopState + 1) % 3; localStorage.setItem('eq-loop-state', loopState); updateUI(); };
+document.getElementById('clearPlaylistBtn').onclick = () => { if(confirm(translations[lang].confirmClear)) { playlist = []; currentTrackIndex = -1; audioEl.src = ""; renderPlaylist(); updateUI(); } };
 
 document.querySelectorAll('.vert-range').forEach(s => { 
     s.oninput = e => { 
@@ -170,7 +188,10 @@ audioEl.ontimeupdate = () => {
     document.getElementById('currentTime').innerText = fmt(audioEl.currentTime);
     document.getElementById('durationTime').innerText = fmt(audioEl.duration || 0);
 };
+
 document.getElementById('progressSlider').oninput = e => audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+document.getElementById('volSlider').oninput = e => { audioEl.volume = e.target.value; updateUI(); };
+
 audioEl.onplay = () => updateUI();
 audioEl.onpause = () => updateUI();
 audioEl.onended = () => { if (loopState === 2) { audioEl.currentTime = 0; audioEl.play(); } else { document.getElementById('nextBtn').click(); } };
