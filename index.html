@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EQ Audio Player Pro</title>
+    <title>EQ Audio Player</title>
     <meta name="author" content="Yohann Zaoui">
     
     <link rel="icon" href="img/favicon.png" type="image/x-icon">
@@ -77,7 +77,16 @@
         .btn-load-music:hover { transform: translateY(-2px); filter: brightness(1.1); color: white; }
         .btn-load-subtitle { font-size: 0.65rem; font-weight: normal; opacity: 0.85; margin-top: 2px; letter-spacing: 0.5px; }
 
-        .playlist-container { flex-grow: 1; overflow-y: auto; max-height: 480px; background: var(--inner-bg); margin: 15px; border-radius: 12px; scrollbar-width: none; }
+        /* PLAYLIST AJUSTÉE POUR TOUTE LA HAUTEUR */
+        .playlist-container { 
+            flex-grow: 1; /* Remplit l'espace */
+            overflow-y: auto; 
+            background: var(--inner-bg); 
+            margin: 15px; 
+            margin-bottom: 5px; /* Espace réduit au dessus du bouton */
+            border-radius: 12px; 
+            scrollbar-width: none; 
+        }
         .playlist-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
         .playlist-item.active { color: var(--accent); font-weight: bold; background: rgba(26, 188, 156, 0.1); border-left: 4px solid var(--accent); }
 
@@ -161,7 +170,7 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow-lg d-flex flex-column">
+            <div class="card shadow-lg d-flex flex-column" style="height: 100%;">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold">MY LIBRARY</h6>
                     <button id="clearBtn" class="btn btn-sm text-danger p-0"><i class="bi bi-trash3"></i></button>
@@ -191,7 +200,6 @@
     const volIcon = document.getElementById('volIcon');
     const formatTag = document.getElementById('formatTag');
     
-    // --- INITIALISATION DU VOLUME À 5% ---
     let lastVolume = 0.05;
     audioEl.volume = 0.05;
 
