@@ -34,37 +34,19 @@
 
         #track-name { font-size: 1.1rem; font-weight: bold; color: var(--accent-color) !important; height: 3em; display: flex; align-items: center; justify-content: center; text-align: center; text-transform: uppercase; }
 
-        /* BOUTONS AVEC EFFET BLEU AU CLIC UNIQUEMENT */
+        /* BOUTONS UI */
         .ui-btn { 
-            background: transparent; 
-            border: 2px solid var(--btn-quiet); 
-            color: var(--btn-quiet) !important; 
-            border-radius: 50%; 
-            width: 45px; 
-            height: 45px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: all 0.1s ease;
-            cursor: pointer;
-            outline: none;
+            background: transparent; border: 2px solid var(--btn-quiet); color: var(--btn-quiet) !important; 
+            border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; 
+            justify-content: center; transition: all 0.1s ease; cursor: pointer; outline: none;
         }
-        .ui-btn i { color: var(--btn-quiet) !important; transition: all 0.1s ease; }
-
-        /* État actif (clic) pour tous les boutons de contrôle */
-        .ui-btn:active { 
-            background-color: var(--accent-color); 
-            border-color: var(--accent-color);
-            transform: scale(0.92);
-        }
+        .ui-btn:active { background-color: var(--accent-color); border-color: var(--accent-color); transform: scale(0.92); }
         .ui-btn:active i { color: white !important; }
 
-        /* BOUTON PLAY (Reste bleu fixe car c'est l'action principale) */
         .play-btn { background-color: var(--accent-color); border: none; width: 75px; height: 75px; border-radius: 50%; box-shadow: 0 5px 15px rgba(61, 139, 253, 0.4); }
         .play-btn:active { transform: scale(0.95); }
 
-        /* EQ & PLAYLIST */
-        #playlist-col { transition: all 0.3s ease-in-out; }
+        /* PLAYLIST & EQ */
         .playlist-content { height: 520px; overflow-y: auto; scrollbar-width: thin; }
         .playlist-item { cursor: pointer; padding: 14px; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
         .playlist-item.active { background: var(--accent-color); color: white !important; }
@@ -75,7 +57,6 @@
         .eq-label { font-size: 0.65rem; margin-top: 8px; color: var(--accent-color) !important; font-weight: bold; }
         .btn-reset-eq { font-size: 0.75rem; padding: 4px 15px; border-radius: 10px; margin-top: 15px; border: 1px solid var(--accent-color); color: var(--accent-color); background: transparent; font-weight: bold; }
 
-        /* SLIDERS */
         .controls-bg { background-color: #1f2227; border-radius: 18px; padding: 15px; border: 1px solid var(--border-color); }
         .form-range::-webkit-slider-runnable-track { background: #333; height: 4px; border-radius: 2px; }
         .form-range::-webkit-slider-thumb { background: var(--accent-color); border: 1px solid #fff; }
@@ -90,22 +71,15 @@
                 <div class="card glass-card p-4 d-flex flex-column justify-content-between">
                     <div class="text-center">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <button id="toggle-playlist" class="ui-btn" title="Playlist">
-                                <i class="bi bi-list-ul fs-5"></i>
-                            </button>
-                            
+                            <button id="toggle-playlist" class="ui-btn"><i class="bi bi-list-ul fs-5"></i></button>
                             <h5 class="fw-bold m-0">HIFI AUDIO PLAYER</h5>
-                            
-                            <button id="toggle-eq" class="ui-btn" title="Égaliseur">
-                                <i class="bi bi-sliders fs-5"></i>
-                            </button>
+                            <button id="toggle-eq" class="ui-btn"><i class="bi bi-sliders fs-5"></i></button>
                         </div>
 
                         <div class="cover-wrapper">
                             <img id="album-cover" src="" alt="Album Art">
                             <i id="default-cover" class="bi bi-disc-fill"></i>
                         </div>
-
                         <div id="track-name" class="px-2">SÉLECTIONNEZ UNE MUSIQUE</div>
                     </div>
 
@@ -117,14 +91,12 @@
                             <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">3kHz</span></div>
                             <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">12kHz</span></div>
                         </div>
-                        <div class="text-center">
-                            <button id="reset-eq" class="btn-reset-eq">RÉINITIALISER L'ÉGALISEUR</button>
-                        </div>
+                        <div class="text-center"><button id="reset-eq" class="btn-reset-eq">RÉINITIALISER L'ÉGALISEUR</button></div>
                     </div>
 
                     <div id="main-controls">
                         <div class="px-2 mb-3">
-                            <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1" autocomplete="off">
+                            <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1">
                             <div class="d-flex justify-content-between small fw-bold mt-1">
                                 <span id="current-time">0:00</span>
                                 <span id="duration">0:00</span>
@@ -140,10 +112,10 @@
                         <div class="controls-bg">
                             <div class="d-flex align-items-center gap-3">
                                 <i class="bi bi-volume-mute-fill fs-5"></i>
-                                <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0" autocomplete="off">
+                                <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0.5">
                                 <i class="bi bi-volume-up-fill fs-5"></i>
                             </div>
-                            <div id="vol-label" class="text-center small fw-bold mt-2 text-danger">MUET (0%)</div>
+                            <div id="vol-label" class="text-center small fw-bold mt-2">VOLUME : 50%</div>
                         </div>
                     </div>
                 </div>
@@ -153,17 +125,12 @@
                 <div class="card glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="m-0 fw-bold">PLAYLIST</h6>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="document.getElementById('file-upload').click()">
-                            <i class="bi bi-plus-lg me-1"></i> AJOUTER
-                        </button>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.getElementById('file-upload').click()">AJOUTER</button>
                         <input id="file-upload" type="file" accept="audio/*" multiple style="display:none;">
                     </div>
-                    <div class="playlist-content" id="playlist">
-                        <div class="text-center p-5 opacity-50">LA LISTE EST VIDE</div>
-                    </div>
+                    <div class="playlist-content" id="playlist"><div class="text-center p-5 opacity-50">LISTE VIDE</div></div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -172,55 +139,58 @@
     <script>
         const jsmediatags = window.jsmediatags;
         const audio = document.getElementById('audio-player');
+        const volSlider = document.getElementById('volume-slider');
+        const volLabel = document.getElementById('vol-label');
+        
+        // --- NOUVELLE FONCTION DE MISE À JOUR DU VOLUME ---
+        function updateVolumeDisplay() {
+            const val = parseFloat(volSlider.value);
+            audio.volume = val;
+            const percent = Math.round(val * 100);
+            volLabel.textContent = percent === 0 ? "MUET (0%)" : `VOLUME : ${percent}%`;
+            volLabel.className = percent === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
+        }
+
+        volSlider.addEventListener('input', updateVolumeDisplay);
+
+        // --- RESTE DU CODE ---
         const playBtn = document.getElementById('play-pause');
-        const volumeSlider = document.getElementById('volume-slider');
         const seekBar = document.getElementById('seek-bar');
-        const fileInput = document.getElementById('file-upload');
         const playlistEl = document.getElementById('playlist');
         const trackNameEl = document.getElementById('track-name');
         const albumCover = document.getElementById('album-cover');
         const defaultCover = document.getElementById('default-cover');
         const eqContainer = document.getElementById('eq-container');
-        const toggleEqBtn = document.getElementById('toggle-eq');
-        const togglePlaylistBtn = document.getElementById('toggle-playlist');
-        const playlistCol = document.getElementById('playlist-col');
-        const resetEqBtn = document.getElementById('reset-eq');
-        const eqSliders = document.querySelectorAll('.eq-slider');
 
         let playlist = [];
         let currentIndex = 0;
         let audioCtx, source, filters = [];
 
-        // TOGGLE PLAYLIST
-        togglePlaylistBtn.onclick = () => {
-            const isHidden = playlistCol.style.display === 'none';
-            playlistCol.style.display = isHidden ? 'block' : 'none';
+        document.getElementById('toggle-playlist').onclick = () => {
+            const col = document.getElementById('playlist-col');
+            col.style.display = col.style.display === 'none' ? 'block' : 'none';
         };
 
-        // POCHETTE
+        document.getElementById('toggle-eq').onclick = () => {
+            eqContainer.style.display = eqContainer.style.display === 'none' ? 'block' : 'none';
+        };
+
         function updateMetadata(file) {
             jsmediatags.read(file, {
                 onSuccess: function(tag) {
                     const data = tag.tags.picture;
                     if (data) {
                         const { data: bytes, format } = data;
-                        let base64String = "";
-                        for (let i = 0; i < bytes.length; i++) base64String += String.fromCharCode(bytes[i]);
-                        albumCover.src = `data:${format};base64,${window.btoa(base64String)}`;
-                        albumCover.style.display = 'block';
-                        defaultCover.style.display = 'none';
+                        let base64 = "";
+                        for (let i = 0; i < bytes.length; i++) base64 += String.fromCharCode(bytes[i]);
+                        albumCover.src = `data:${format};base64,${window.btoa(base64)}`;
+                        albumCover.style.display = 'block'; defaultCover.style.display = 'none';
                     } else { resetCover(); }
                 },
-                onError: function() { resetCover(); }
+                onError: resetCover
             });
         }
         function resetCover() { albumCover.style.display = 'none'; defaultCover.style.display = 'block'; }
-
-        // EQ
-        toggleEqBtn.onclick = () => {
-            const isHidden = window.getComputedStyle(eqContainer).display === 'none';
-            eqContainer.style.display = isHidden ? 'block' : 'none';
-        };
 
         function initAudioContext() {
             if (!audioCtx) {
@@ -236,16 +206,15 @@
             }
         }
 
-        eqSliders.forEach((s, i) => {
+        document.querySelectorAll('.eq-slider').forEach((s, i) => {
             s.oninput = (e) => { if(filters[i]) filters[i].gain.value = e.target.value; };
         });
 
-        resetEqBtn.onclick = () => {
-            eqSliders.forEach((s, i) => { s.value = 0; if(filters[i]) filters[i].gain.value = 0; });
+        document.getElementById('reset-eq').onclick = () => {
+            document.querySelectorAll('.eq-slider').forEach((s, i) => { s.value = 0; if(filters[i]) filters[i].gain.value = 0; });
         };
 
-        // PLAYLIST LOGIC
-        fileInput.onchange = (e) => {
+        document.getElementById('file-upload').onchange = (e) => {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
                 const wasEmpty = playlist.length === 0;
@@ -275,8 +244,7 @@
             trackNameEl.textContent = file.name;
             updateMetadata(file);
             renderPlaylist();
-            audio.load();
-            audio.play().catch(() => {});
+            audio.play();
             playBtn.innerHTML = '<i class="bi bi-pause-fill fs-1 text-white"></i>';
         }
 
@@ -290,20 +258,15 @@
         document.getElementById('next-btn').onclick = () => playlist.length && loadTrack((currentIndex + 1) % playlist.length);
         document.getElementById('prev-btn').onclick = () => playlist.length && loadTrack((currentIndex - 1 + playlist.length) % playlist.length);
 
-        volumeSlider.oninput = (e) => {
-            audio.volume = e.target.value;
-            const p = Math.round(e.target.value * 100);
-            volLabel.textContent = p === 0 ? "MUET (0%)" : `VOLUME : ${p}%`;
-            volLabel.className = p === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
-        };
-
         audio.ontimeupdate = () => { seekBar.value = audio.currentTime; document.getElementById('current-time').textContent = formatTime(audio.currentTime); };
         audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('duration').textContent = formatTime(audio.duration); };
         seekBar.oninput = () => audio.currentTime = seekBar.value;
         audio.onended = () => document.getElementById('next-btn').onclick();
 
         function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
-        window.onload = () => { audio.volume = 0; };
+        
+        // Initialisation propre au démarrage
+        window.onload = updateVolumeDisplay;
     </script>
 </body>
 </html>
