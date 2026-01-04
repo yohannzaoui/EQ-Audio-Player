@@ -18,13 +18,20 @@
         }
 
         body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; font-family: -apple-system, sans-serif; overflow-x: hidden; }
-        .glass-card { background-color: var(--card-bg); border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); min-height: 650px; transition: all 0.3s ease; }
+        .glass-card { background-color: var(--card-bg); border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); min-height: 600px; transition: all 0.3s ease; }
         
         h5, h6, span, div, label { color: var(--text-main) !important; }
 
-        /* COVER ART */
+        /* EQ BLOC GAUCHE */
+        #eq-col { display: none; }
+        .eq-vertical-box { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 20px 0; }
+        .eq-slider-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .eq-slider { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 12px; height: 180px; cursor: pointer; }
+        .eq-label { font-size: 0.75rem; margin-top: 10px; color: var(--accent-color) !important; font-weight: bold; }
+
+        /* PLAYER CENTRAL */
         .cover-wrapper {
-            width: 200px; height: 200px; margin: 0 auto 20px auto;
+            width: 220px; height: 220px; margin: 0 auto 20px auto;
             border-radius: 20px; overflow: hidden; background: #1f2227;
             border: 1px solid var(--border-color); display: flex;
             align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -32,7 +39,12 @@
         #album-cover { width: 100%; height: 100%; object-fit: cover; display: none; }
         #default-cover { font-size: 5rem; color: var(--btn-quiet) !important; }
 
-        #track-name { font-size: 1.1rem; font-weight: bold; color: var(--accent-color) !important; height: 3em; display: flex; align-items: center; justify-content: center; text-align: center; text-transform: uppercase; }
+        #track-name { 
+            font-size: 1.1rem; font-weight: bold; color: var(--accent-color) !important; 
+            height: 3em; display: flex; align-items: center; justify-content: center; 
+            text-align: center; text-transform: uppercase; cursor: pointer;
+        }
+        #track-name:hover { opacity: 0.7; text-decoration: underline; }
 
         /* BOUTONS UI */
         .ui-btn { 
@@ -43,55 +55,55 @@
         .ui-btn:active { background-color: var(--accent-color); border-color: var(--accent-color); transform: scale(0.92); }
         .ui-btn:active i { color: white !important; }
 
-        .play-btn { background-color: var(--accent-color); border: none; width: 75px; height: 75px; border-radius: 50%; box-shadow: 0 5px 15px rgba(61, 139, 253, 0.4); }
-        .play-btn:active { transform: scale(0.95); }
+        .play-btn { background-color: var(--accent-color); border: none; width: 80px; height: 80px; border-radius: 50%; box-shadow: 0 5px 15px rgba(61, 139, 253, 0.4); }
 
-        /* PLAYLIST & EQ */
-        .playlist-content { height: 520px; overflow-y: auto; scrollbar-width: thin; }
+        /* PLAYLIST DROITE */
+        #playlist-col { display: block; }
+        .playlist-content { height: 480px; overflow-y: auto; scrollbar-width: thin; }
         .playlist-item { cursor: pointer; padding: 14px; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
         .playlist-item.active { background: var(--accent-color); color: white !important; }
 
-        #eq-container { background: #1f2227; border-radius: 18px; padding: 15px; border: 1px solid var(--border-color); display: none; margin-bottom: 20px; }
-        .eq-slider-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .eq-slider { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 10px; height: 90px; cursor: pointer; }
-        .eq-label { font-size: 0.65rem; margin-top: 8px; color: var(--accent-color) !important; font-weight: bold; }
-        .btn-reset-eq { font-size: 0.75rem; padding: 4px 15px; border-radius: 10px; margin-top: 15px; border: 1px solid var(--accent-color); color: var(--accent-color); background: transparent; font-weight: bold; }
-
+        /* SLIDERS & CONTROLS */
         .controls-bg { background-color: #1f2227; border-radius: 18px; padding: 15px; border: 1px solid var(--border-color); }
         .form-range::-webkit-slider-runnable-track { background: #333; height: 4px; border-radius: 2px; }
-        .form-range::-webkit-slider-thumb { background: var(--accent-color); border: 1px solid #fff; }
+        .btn-reset-eq { font-size: 0.75rem; padding: 6px 15px; border-radius: 10px; border: 1px solid var(--accent-color); color: var(--accent-color); background: transparent; font-weight: bold; margin-top: auto; }
     </style>
 </head>
 <body>
 
-    <div class="container py-4">
-        <div class="row g-4 justify-content-center">
+    <div class="container-fluid px-5">
+        <div class="row g-4 justify-content-center align-items-stretch">
             
-            <div id="player-col" class="col-lg-5 col-md-10">
+            <div id="eq-col" class="col-lg-3 col-md-4">
+                <div class="card glass-card p-4 h-100 d-flex flex-column">
+                    <h6 class="fw-bold mb-4 text-center">ÉGALISEUR PRÉCISION</h6>
+                    <div class="eq-vertical-box">
+                        <div class="d-flex justify-content-around h-100">
+                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">60</span></div>
+                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">400</span></div>
+                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">1K</span></div>
+                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">3K</span></div>
+                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">12K</span></div>
+                        </div>
+                    </div>
+                    <button id="reset-eq" class="btn-reset-eq w-100">RÉINITIALISER</button>
+                </div>
+            </div>
+
+            <div id="player-col" class="col-lg-4 col-md-8">
                 <div class="card glass-card p-4 d-flex flex-column justify-content-between">
                     <div class="text-center">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <button id="toggle-playlist" class="ui-btn"><i class="bi bi-list-ul fs-5"></i></button>
+                            <button id="toggle-eq" class="ui-btn" title="Égaliseur"><i class="bi bi-sliders fs-5"></i></button>
                             <h5 class="fw-bold m-0">HIFI AUDIO PLAYER</h5>
-                            <button id="toggle-eq" class="ui-btn"><i class="bi bi-sliders fs-5"></i></button>
+                            <button id="toggle-playlist" class="ui-btn" title="Playlist"><i class="bi bi-list-ul fs-5"></i></button>
                         </div>
 
                         <div class="cover-wrapper">
                             <img id="album-cover" src="" alt="Album Art">
                             <i id="default-cover" class="bi bi-disc-fill"></i>
                         </div>
-                        <div id="track-name" class="px-2">SÉLECTIONNEZ UNE MUSIQUE</div>
-                    </div>
-
-                    <div id="eq-container">
-                        <div class="d-flex justify-content-around">
-                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">60Hz</span></div>
-                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">400Hz</span></div>
-                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">1kHz</span></div>
-                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">3kHz</span></div>
-                            <div class="eq-slider-container"><input type="range" class="eq-slider" min="-12" max="12" value="0"><span class="eq-label">12kHz</span></div>
-                        </div>
-                        <div class="text-center"><button id="reset-eq" class="btn-reset-eq">RÉINITIALISER L'ÉGALISEUR</button></div>
+                        <div id="track-name" class="px-2" onclick="document.getElementById('file-upload').click()">SÉLECTIONNEZ UNE MUSIQUE</div>
                     </div>
 
                     <div id="main-controls">
@@ -121,8 +133,8 @@
                 </div>
             </div>
 
-            <div id="playlist-col" class="col-lg-4 col-md-10">
-                <div class="card glass-card p-4">
+            <div id="playlist-col" class="col-lg-3 col-md-4">
+                <div class="card glass-card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="m-0 fw-bold">PLAYLIST</h6>
                         <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.getElementById('file-upload').click()">AJOUTER</button>
@@ -131,6 +143,7 @@
                     <div class="playlist-content" id="playlist"><div class="text-center p-5 opacity-50">LISTE VIDE</div></div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -141,8 +154,25 @@
         const audio = document.getElementById('audio-player');
         const volSlider = document.getElementById('volume-slider');
         const volLabel = document.getElementById('vol-label');
-        
-        // --- NOUVELLE FONCTION DE MISE À JOUR DU VOLUME ---
+        const playBtn = document.getElementById('play-pause');
+        const seekBar = document.getElementById('seek-bar');
+        const playlistEl = document.getElementById('playlist');
+        const trackNameEl = document.getElementById('track-name');
+        const albumCover = document.getElementById('album-cover');
+        const defaultCover = document.getElementById('default-cover');
+
+        // TOGGLES
+        document.getElementById('toggle-eq').onclick = () => {
+            const eqCol = document.getElementById('eq-col');
+            eqCol.style.display = (eqCol.style.display === 'none' || eqCol.style.display === '') ? 'block' : 'none';
+        };
+
+        document.getElementById('toggle-playlist').onclick = () => {
+            const playCol = document.getElementById('playlist-col');
+            playCol.style.display = (playCol.style.display === 'none' || playCol.style.display === '') ? 'block' : 'none';
+        };
+
+        // VOLUME
         function updateVolumeDisplay() {
             const val = parseFloat(volSlider.value);
             audio.volume = val;
@@ -150,31 +180,9 @@
             volLabel.textContent = percent === 0 ? "MUET (0%)" : `VOLUME : ${percent}%`;
             volLabel.className = percent === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
         }
-
         volSlider.addEventListener('input', updateVolumeDisplay);
 
-        // --- RESTE DU CODE ---
-        const playBtn = document.getElementById('play-pause');
-        const seekBar = document.getElementById('seek-bar');
-        const playlistEl = document.getElementById('playlist');
-        const trackNameEl = document.getElementById('track-name');
-        const albumCover = document.getElementById('album-cover');
-        const defaultCover = document.getElementById('default-cover');
-        const eqContainer = document.getElementById('eq-container');
-
-        let playlist = [];
-        let currentIndex = 0;
-        let audioCtx, source, filters = [];
-
-        document.getElementById('toggle-playlist').onclick = () => {
-            const col = document.getElementById('playlist-col');
-            col.style.display = col.style.display === 'none' ? 'block' : 'none';
-        };
-
-        document.getElementById('toggle-eq').onclick = () => {
-            eqContainer.style.display = eqContainer.style.display === 'none' ? 'block' : 'none';
-        };
-
+        // METADATA & COVER
         function updateMetadata(file) {
             jsmediatags.read(file, {
                 onSuccess: function(tag) {
@@ -192,6 +200,8 @@
         }
         function resetCover() { albumCover.style.display = 'none'; defaultCover.style.display = 'block'; }
 
+        // AUDIO CONTEXT & EQ
+        let audioCtx, source, filters = [];
         function initAudioContext() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -207,12 +217,19 @@
         }
 
         document.querySelectorAll('.eq-slider').forEach((s, i) => {
-            s.oninput = (e) => { if(filters[i]) filters[i].gain.value = e.target.value; };
+            s.oninput = (e) => { 
+                initAudioContext();
+                if(filters[i]) filters[i].gain.value = e.target.value; 
+            };
         });
 
         document.getElementById('reset-eq').onclick = () => {
             document.querySelectorAll('.eq-slider').forEach((s, i) => { s.value = 0; if(filters[i]) filters[i].gain.value = 0; });
         };
+
+        // PLAYLIST & CORE
+        let playlist = [];
+        let currentIndex = 0;
 
         document.getElementById('file-upload').onchange = (e) => {
             const files = Array.from(e.target.files);
@@ -265,7 +282,6 @@
 
         function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
         
-        // Initialisation propre au démarrage
         window.onload = updateVolumeDisplay;
     </script>
 </body>
