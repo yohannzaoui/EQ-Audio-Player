@@ -7,93 +7,95 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        /* VARIABLES DE THÈME */
         :root { 
             --bg-color: #f0f2f5; 
-            --card-bg: #ffffff; 
+            --card-bg: rgba(255, 255, 255, 0.9); 
             --text-main: #212529; 
-            --text-muted: #6c757d;
             --accent-color: #0d6efd; 
             --border-color: rgba(0,0,0,0.1);
             --item-hover: rgba(13, 110, 253, 0.05);
         }
 
         body.dark-theme { 
-            --bg-color: #121212; 
-            --card-bg: #1e1e1e; 
+            --bg-color: #0f1012; 
+            --card-bg: rgba(30, 30, 32, 0.8); 
             --text-main: #f8f9fa; 
-            --text-muted: #adb5bd;
             --accent-color: #3d8bfd; 
             --border-color: rgba(255,255,255,0.1);
-            --item-hover: rgba(255,255,255,0.05);
+            --item-hover: rgba(255,255,255,0.08);
         }
 
         body { 
             background-color: var(--bg-color); 
             color: var(--text-main); 
-            transition: 0.3s; 
+            transition: 0.4s ease; 
             min-height: 100vh; 
             display: flex; 
-            align-items: center; 
+            align-items: center;
+            background-image: radial-gradient(circle at 20% 30%, rgba(13, 110, 253, 0.05) 0%, transparent 40%);
         }
 
-        /* CARTES */
-        .player-card, .playlist-card { 
+        .glass-card { 
             background-color: var(--card-bg); 
-            color: var(--text-main);
-            border-radius: 24px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 28px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
             border: 1px solid var(--border-color); 
-            height: 520px; 
+            height: 520px;
+            transition: transform 0.3s ease;
         }
 
-        h4, h5, h6, #track-name { color: var(--text-main); }
-        .small-text { color: var(--text-muted); font-weight: bold; }
+        #track-name { font-size: 1.15rem; color: var(--text-main); height: 3em; display: flex; align-items: center; justify-content: center; }
 
         /* PLAYLIST */
-        .playlist-content { height: 380px; overflow-y: auto; }
+        .playlist-content { height: 380px; overflow-y: auto; padding-right: 5px; }
         .playlist-item { 
-            cursor: pointer; 
-            padding: 12px; 
-            font-size: 0.9rem; 
-            border-bottom: 1px solid var(--border-color); 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            color: var(--text-main);
+            cursor: pointer; padding: 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); 
+            display: flex; align-items: center; gap: 10px; color: var(--text-main); border-radius: 12px; transition: 0.2s;
         }
         .playlist-item:hover { background: var(--item-hover); }
-        .playlist-item.active { background: var(--accent-color); color: white; border-radius: 12px; }
+        .playlist-item.active { background: var(--accent-color); color: white; box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3); }
 
         /* INPUTS */
-        .bg-custom-input { background-color: var(--item-hover) !important; border: 1px solid var(--border-color) !important; }
-        .form-range::-webkit-slider-thumb { background: var(--accent-color); }
+        .controls-bg { background-color: rgba(0,0,0,0.03); border-radius: 20px; padding: 15px; border: 1px solid var(--border-color); }
+        body.dark-theme .controls-bg { background-color: rgba(255,255,255,0.03); }
         
-        .vol-warning { font-size: 0.8rem; font-weight: bold; color: #ff4d4d; }
-        .vol-ok { font-size: 0.8rem; font-weight: bold; color: #2ecc71; }
+        .form-range::-webkit-slider-thumb { background: var(--accent-color); border: 2px solid #fff; }
+
+        .btn-theme-toggle {
+            padding: 0 10px;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            border: none;
+            background: none;
+            transition: opacity 0.2s;
+        }
+        .btn-theme-toggle:hover { opacity: 0.7; }
     </style>
 </head>
 <body class="light-theme">
-
-    <button id="theme-btn" class="btn btn-outline-secondary position-absolute top-0 end-0 m-3 rounded-circle" style="width: 45px; height: 45px;">
-        <i class="bi bi-moon-stars"></i>
-    </button>
 
     <div class="container py-5">
         <div class="row g-4 justify-content-center">
             
             <div class="col-lg-5">
-                <div class="card player-card p-4 d-flex flex-column justify-content-between">
+                <div class="card glass-card p-4 d-flex flex-column justify-content-between">
                     <div class="text-center">
-                        <h5 class="fw-bold mb-2">Hi-Fi Audio Player</h5>
-                        <p class="small text-muted mb-4">Studio Quality</p>
-                        <div id="track-name" class="my-4 px-2 fw-bold text-truncate">Prêt à importer</div>
+                        <div class="d-flex justify-content-center align-items-center mb-1">
+                            <h5 class="fw-bold m-0">Hi-Fi Audio Player</h5>
+                            <button id="theme-btn" class="btn-theme-toggle" title="Changer de mode">
+                                <i class="bi bi-moon-stars"></i>
+                            </button>
+                        </div>
+                        <p class="small opacity-50 mb-3">Expérience Audio Pure</p>
+                        <div id="track-name" class="text-center fw-bold px-2">Aucun morceau chargé</div>
                     </div>
 
                     <div>
                         <div class="px-2 mb-4">
                             <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1">
-                            <div class="d-flex justify-content-between small-text">
+                            <div class="d-flex justify-content-between small fw-bold opacity-75">
                                 <span id="current-time">0:00</span>
                                 <span id="duration">0:00</span>
                             </div>
@@ -105,30 +107,30 @@
                             <button id="next-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-end-fill fs-4"></i></button>
                         </div>
                         
-                        <div class="p-3 rounded-pill bg-custom-input">
+                        <div class="controls-bg">
                             <div class="d-flex align-items-center gap-3">
                                 <i class="bi bi-volume-mute-fill" id="vol-icon"></i>
                                 <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0">
                             </div>
-                            <div id="vol-label" class="text-center vol-warning mt-1">VOLUME À 0% - MONTEZ LE SON</div>
+                            <div id="vol-label" class="text-center small fw-bold mt-2 text-danger">VOLUME À 0%</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card playlist-card p-4">
+                <div class="card glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="m-0 fw-bold">Playlist</h6>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.getElementById('file-upload').click()">
+                        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="document.getElementById('file-upload').click()">
                             <i class="bi bi-plus-circle me-1"></i> Ajouter
                         </button>
                         <input id="file-upload" type="file" accept="audio/*" multiple style="display:none;">
                     </div>
                     <div class="playlist-content" id="playlist">
-                        <div class="text-center p-5 opacity-50 small">
-                            <i class="bi bi-music-note-list fs-2 d-block mb-2"></i>
-                            Aucun fichier
+                        <div class="text-center p-5 opacity-25">
+                            <i class="bi bi-music-note-list fs-1 d-block mb-2"></i>
+                            Vide
                         </div>
                     </div>
                 </div>
@@ -156,10 +158,10 @@
         fileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
-                const isFirstLoad = playlist.length === 0;
+                const startAt = playlist.length;
                 playlist = [...playlist, ...files];
                 renderPlaylist();
-                if (isFirstLoad) loadTrack(0);
+                if (startAt === 0) loadTrack(0);
             }
         });
 
@@ -200,8 +202,8 @@
             const val = e.target.value;
             audio.volume = val;
             const percent = Math.round(val * 100);
-            volLabel.textContent = percent === 0 ? "VOLUME À 0% - MONTEZ LE SON" : "Volume : " + percent + "%";
-            volLabel.className = percent === 0 ? "text-center vol-warning mt-1" : "text-center vol-ok mt-1";
+            volLabel.textContent = percent === 0 ? "VOLUME À 0%" : "Volume : " + percent + "%";
+            volLabel.className = percent === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
             document.getElementById('vol-icon').className = val == 0 ? "bi bi-volume-mute-fill" : "bi bi-volume-up-fill";
         };
 
@@ -216,14 +218,11 @@
             return `${m}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // GESTION DU THÈME
-        function toggleTheme() {
+        themeBtn.onclick = () => {
             const isDark = document.body.classList.toggle('dark-theme');
             themeBtn.innerHTML = isDark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
             localStorage.setItem('hifi_theme', isDark ? 'dark' : 'light');
-        }
-
-        themeBtn.onclick = toggleTheme;
+        };
 
         window.onload = () => {
             volumeSlider.value = 0;
