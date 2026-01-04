@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hi-Fi Audio Player - Contrast Dark</title>
+    <title>Hi-Fi Audio Player - Pro Dark</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root { 
             --bg-color: #0a0b0d; 
             --card-bg: #16181c; 
-            --text-main: #ffffff; /* Blanc pur pour une lisibilité maximale */
+            --text-main: #ffffff; 
             --text-dim: #a0a0a0;
             --accent-color: #3d8bfd; 
             --border-color: #2d2f34;
+            --btn-quiet: #44474a;
         }
 
         body { 
@@ -22,67 +23,79 @@
             min-height: 100vh; 
             display: flex; 
             align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, sans-serif;
         }
 
         .glass-card { 
             background-color: var(--card-bg); 
             border-radius: 24px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
             border: 1px solid var(--border-color); 
             height: 520px;
         }
 
-        /* Forcer la couleur blanche sur tous les titres et textes */
         h5, h6, p, span, div { color: var(--text-main) !important; }
-        .opacity-50 { color: var(--text-dim) !important; opacity: 1 !important; }
 
         #track-name { 
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             font-weight: bold;
-            color: var(--accent-color) !important; /* Couleur d'accent pour le titre */
+            color: var(--accent-color) !important;
             height: 3.5em; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             text-align: center;
+            text-transform: uppercase;
         }
 
         /* PLAYLIST */
         .playlist-content { height: 380px; overflow-y: auto; }
         .playlist-item { 
-            cursor: pointer; 
-            padding: 14px; 
-            font-size: 0.95rem; 
+            cursor: pointer; padding: 14px; font-size: 0.95rem; 
             border-bottom: 1px solid var(--border-color); 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 12px; transition: 0.2s;
         }
         .playlist-item:hover { background: rgba(255,255,255,0.05); }
-        .playlist-item.active { 
-            background: var(--accent-color); 
-            color: white !important; 
+        .playlist-item.active { background: var(--accent-color); color: white !important; }
+
+        /* BOUTONS NAVIGATION (Bleu au clic uniquement) */
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--btn-quiet);
+            color: var(--btn-quiet) !important;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
         }
 
-        /* CONTROLES ET INPUTS */
-        .controls-bg { 
-            background-color: #1f2227; 
-            border-radius: 18px; 
-            padding: 15px; 
-            border: 1px solid var(--border-color); 
-        }
+        .nav-btn i { color: var(--btn-quiet) !important; }
 
-        /* Style des barres de progression pour qu'elles soient visibles */
-        .form-range { background: transparent; }
+        .nav-btn:active {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+            transform: scale(0.92);
+        }
+        .nav-btn:active i { color: white !important; }
+
+        /* BOUTON PLAY */
+        .play-btn {
+            background-color: var(--accent-color);
+            border: none;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(61, 139, 253, 0.4);
+        }
+        .play-btn i { color: white !important; font-size: 2rem; }
+
+        /* CONTROLES */
+        .controls-bg { background-color: #1f2227; border-radius: 18px; padding: 15px; border: 1px solid var(--border-color); }
         .form-range::-webkit-slider-runnable-track { background: #333; height: 6px; border-radius: 3px; }
         .form-range::-webkit-slider-thumb { background: var(--accent-color); margin-top: -5px; }
-        
-        /* Boutons */
-        .btn-primary { background-color: var(--accent-color); border: none; font-weight: bold; }
-        .btn-outline-primary { color: var(--accent-color); border-color: var(--accent-color); }
-        .btn-outline-primary:hover { background-color: var(--accent-color); color: white; }
 
         .text-danger { color: #ff5f5f !important; }
         .text-success { color: #00ff88 !important; }
@@ -95,10 +108,9 @@
             
             <div class="col-lg-5 col-md-10">
                 <div class="card glass-card p-4 d-flex flex-column justify-content-between">
-                    <div class="text-center">
+                    <div class="text-center pt-2">
                         <h5 class="fw-bold m-0">HI-FI PLAYER</h5>
-                        <p class="small opacity-50 mb-3">Édition Sombre Haute Visibilité</p>
-                        <div id="track-name" class="px-2">CHARGER UN FICHIER</div>
+                        <div id="track-name" class="px-2 mt-4">SÉLECTIONNEZ UNE PISTE</div>
                     </div>
 
                     <div>
@@ -110,10 +122,10 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
-                            <button id="prev-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-start-fill fs-4"></i></button>
-                            <button id="play-pause" class="btn btn-primary btn-lg rounded-pill px-5 py-2 shadow-lg"><i class="bi bi-play-fill fs-3"></i></button>
-                            <button id="next-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-end-fill fs-4"></i></button>
+                        <div class="d-flex justify-content-center align-items-center gap-4 mb-4">
+                            <button id="prev-btn" class="nav-btn"><i class="bi bi-skip-start-fill fs-4"></i></button>
+                            <button id="play-pause" class="play-btn"><i class="bi bi-play-fill"></i></button>
+                            <button id="next-btn" class="nav-btn"><i class="bi bi-skip-end-fill fs-4"></i></button>
                         </div>
                         
                         <div class="controls-bg">
@@ -122,7 +134,7 @@
                                 <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0" autocomplete="off">
                                 <i class="bi bi-volume-up-fill"></i>
                             </div>
-                            <div id="vol-label" class="text-center small fw-bold mt-2 text-danger">SON COUPÉ (0%)</div>
+                            <div id="vol-label" class="text-center small fw-bold mt-2 text-danger">SILENCE (0%)</div>
                         </div>
                     </div>
                 </div>
@@ -131,17 +143,14 @@
             <div class="col-lg-4 col-md-10">
                 <div class="card glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="m-0 fw-bold">MA PLAYLIST</h6>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.getElementById('file-upload').click()">
+                        <h6 class="m-0 fw-bold">PLAYLIST</h6>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="document.getElementById('file-upload').click()">
                             <i class="bi bi-plus-lg me-1"></i> AJOUTER
                         </button>
                         <input id="file-upload" type="file" accept="audio/*" multiple style="display:none;">
                     </div>
                     <div class="playlist-content" id="playlist">
-                        <div class="text-center p-5 opacity-50">
-                            <i class="bi bi-music-note-list fs-1 d-block mb-2"></i>
-                            LISTE VIDE
-                        </div>
+                        <div class="text-center p-5 opacity-50">LISTE VIDE</div>
                     </div>
                 </div>
             </div>
@@ -190,19 +199,19 @@
             const file = playlist[index];
             if (audio.src) URL.revokeObjectURL(audio.src);
             audio.src = URL.createObjectURL(file);
-            trackNameEl.textContent = file.name.toUpperCase();
+            trackNameEl.textContent = file.name;
             audio.volume = volumeSlider.value;
             renderPlaylist();
             audio.load();
             audio.play().catch(() => {});
-            playBtn.innerHTML = '<i class="bi bi-pause-fill fs-3"></i>';
+            playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
         }
 
         playBtn.addEventListener('click', () => {
             if (!audio.src && playlist.length > 0) { loadTrack(0); return; }
             if (!audio.src) return;
-            if (audio.paused) { audio.play(); playBtn.innerHTML = '<i class="bi bi-pause-fill fs-3"></i>'; }
-            else { audio.pause(); playBtn.innerHTML = '<i class="bi bi-play-fill fs-3"></i>'; }
+            if (audio.paused) { audio.play(); playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>'; }
+            else { audio.pause(); playBtn.innerHTML = '<i class="bi bi-play-fill"></i>'; }
         });
 
         document.getElementById('next-btn').onclick = () => { if (playlist.length > 0) loadTrack((currentIndex + 1) % playlist.length); };
@@ -212,20 +221,12 @@
             const val = e.target.value;
             audio.volume = val;
             const percent = Math.round(val * 100);
-            volLabel.textContent = percent === 0 ? "SON COUPÉ (0%)" : "VOLUME : " + percent + "%";
+            volLabel.textContent = percent === 0 ? "SILENCE (0%)" : "VOLUME : " + percent + "%";
             volLabel.className = percent === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
         };
 
-        audio.ontimeupdate = () => { 
-            if(!isNaN(audio.duration)) {
-                seekBar.value = audio.currentTime; 
-                document.getElementById('current-time').textContent = formatTime(audio.currentTime);
-            }
-        };
-        audio.onloadedmetadata = () => { 
-            seekBar.max = audio.duration; 
-            document.getElementById('duration').textContent = formatTime(audio.duration); 
-        };
+        audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekBar.value = audio.currentTime; document.getElementById('current-time').textContent = formatTime(audio.currentTime); } };
+        audio.onloadedmetadata = () => { seekBar.max = audio.duration; document.getElementById('duration').textContent = formatTime(audio.duration); };
         seekBar.oninput = () => audio.currentTime = seekBar.value;
         audio.onended = () => document.getElementById('next-btn').onclick();
 
@@ -235,10 +236,7 @@
             return `${m}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        window.onload = () => {
-            volumeSlider.value = 0;
-            audio.volume = 0;
-        };
+        window.onload = () => { volumeSlider.value = 0; audio.volume = 0; };
     </script>
 </body>
 </html>
