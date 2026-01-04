@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hi-Fi Audio Player - Dark Edition</title>
+    <title>Hi-Fi Audio Player - Contrast Dark</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root { 
-            --bg-color: #0f1012; 
-            --card-bg: rgba(30, 30, 32, 0.85); 
-            --text-main: #f8f9fa; 
+            --bg-color: #0a0b0d; 
+            --card-bg: #16181c; 
+            --text-main: #ffffff; /* Blanc pur pour une lisibilité maximale */
+            --text-dim: #a0a0a0;
             --accent-color: #3d8bfd; 
-            --border-color: rgba(255,255,255,0.15);
+            --border-color: #2d2f34;
         }
 
         body { 
@@ -21,38 +22,70 @@
             min-height: 100vh; 
             display: flex; 
             align-items: center;
-            background-image: radial-gradient(circle at 20% 30%, rgba(61, 139, 253, 0.08) 0%, transparent 40%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         .glass-card { 
             background-color: var(--card-bg); 
-            -webkit-backdrop-filter: blur(15px);
-            backdrop-filter: blur(15px);
-            border-radius: 28px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
             border: 1px solid var(--border-color); 
             height: 520px;
         }
 
-        #track-name { font-size: 1.15rem; color: var(--text-main); height: 3em; display: flex; align-items: center; justify-content: center; }
+        /* Forcer la couleur blanche sur tous les titres et textes */
+        h5, h6, p, span, div { color: var(--text-main) !important; }
+        .opacity-50 { color: var(--text-dim) !important; opacity: 1 !important; }
+
+        #track-name { 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            color: var(--accent-color) !important; /* Couleur d'accent pour le titre */
+            height: 3.5em; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center;
+        }
 
         /* PLAYLIST */
-        .playlist-content { height: 380px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        .playlist-content { height: 380px; overflow-y: auto; }
         .playlist-item { 
-            cursor: pointer; padding: 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); 
-            display: flex; align-items: center; gap: 10px; color: var(--text-main); border-radius: 12px; transition: 0.2s;
+            cursor: pointer; 
+            padding: 14px; 
+            font-size: 0.95rem; 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            transition: 0.2s;
         }
-        .playlist-item:hover { background: rgba(255,255,255,0.08); }
-        .playlist-item.active { background: var(--accent-color); color: white; box-shadow: 0 4px 12px rgba(61, 139, 253, 0.3); }
+        .playlist-item:hover { background: rgba(255,255,255,0.05); }
+        .playlist-item.active { 
+            background: var(--accent-color); 
+            color: white !important; 
+        }
 
-        /* CONTROLES */
-        .controls-bg { background-color: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; border: 1px solid var(--border-color); }
-        .form-range::-webkit-slider-thumb { background: var(--accent-color); border: 2px solid #fff; }
-        .form-range::-moz-range-thumb { background: var(--accent-color); border: 2px solid #fff; width: 1.25rem; height: 1.25rem; }
+        /* CONTROLES ET INPUTS */
+        .controls-bg { 
+            background-color: #1f2227; 
+            border-radius: 18px; 
+            padding: 15px; 
+            border: 1px solid var(--border-color); 
+        }
 
+        /* Style des barres de progression pour qu'elles soient visibles */
+        .form-range { background: transparent; }
+        .form-range::-webkit-slider-runnable-track { background: #333; height: 6px; border-radius: 3px; }
+        .form-range::-webkit-slider-thumb { background: var(--accent-color); margin-top: -5px; }
+        
+        /* Boutons */
+        .btn-primary { background-color: var(--accent-color); border: none; font-weight: bold; }
         .btn-outline-primary { color: var(--accent-color); border-color: var(--accent-color); }
-        .btn-outline-primary:hover { background-color: var(--accent-color); border-color: var(--accent-color); color: white; }
-        .btn-primary { background-color: var(--accent-color); border: none; }
+        .btn-outline-primary:hover { background-color: var(--accent-color); color: white; }
+
+        .text-danger { color: #ff5f5f !important; }
+        .text-success { color: #00ff88 !important; }
     </style>
 </head>
 <body>
@@ -63,32 +96,33 @@
             <div class="col-lg-5 col-md-10">
                 <div class="card glass-card p-4 d-flex flex-column justify-content-between">
                     <div class="text-center">
-                        <h5 class="fw-bold m-0 mt-2">Hi-Fi Audio Player</h5>
-                        <p class="small opacity-50 mb-3">Dark Edition</p>
-                        <div id="track-name" class="text-center fw-bold px-2 text-truncate">Prêt pour l'écoute</div>
+                        <h5 class="fw-bold m-0">HI-FI PLAYER</h5>
+                        <p class="small opacity-50 mb-3">Édition Sombre Haute Visibilité</p>
+                        <div id="track-name" class="px-2">CHARGER UN FICHIER</div>
                     </div>
 
                     <div>
                         <div class="px-2 mb-4">
                             <input type="range" class="form-range" id="seek-bar" value="0" min="0" step="0.1" autocomplete="off">
-                            <div class="d-flex justify-content-between small fw-bold opacity-75 mt-1">
-                                <span id="current-time">0:00</span>
-                                <span id="duration">0:00</span>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span id="current-time" class="small fw-bold">0:00</span>
+                                <span id="duration" class="small fw-bold">0:00</span>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
-                            <button id="prev-btn" class="btn btn-outline-primary rounded-circle p-2"><i class="bi bi-skip-start-fill fs-4"></i></button>
-                            <button id="play-pause" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg"><i class="bi bi-play-fill fs-3"></i></button>
-                            <button id="next-btn" class="btn btn-outline-primary rounded-circle p-2"><i class="bi bi-skip-end-fill fs-4"></i></button>
+                            <button id="prev-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-start-fill fs-4"></i></button>
+                            <button id="play-pause" class="btn btn-primary btn-lg rounded-pill px-5 py-2 shadow-lg"><i class="bi bi-play-fill fs-3"></i></button>
+                            <button id="next-btn" class="btn btn-outline-primary rounded-circle"><i class="bi bi-skip-end-fill fs-4"></i></button>
                         </div>
                         
-                        <div class="controls-bg text-center">
+                        <div class="controls-bg">
                             <div class="d-flex align-items-center gap-3">
-                                <i class="bi bi-volume-mute-fill" id="vol-icon"></i>
+                                <i class="bi bi-volume-mute-fill"></i>
                                 <input type="range" id="volume-slider" class="form-range" min="0" max="1" step="0.01" value="0" autocomplete="off">
+                                <i class="bi bi-volume-up-fill"></i>
                             </div>
-                            <div id="vol-label" class="small fw-bold mt-2 text-danger">VOLUME : 0%</div>
+                            <div id="vol-label" class="text-center small fw-bold mt-2 text-danger">SON COUPÉ (0%)</div>
                         </div>
                     </div>
                 </div>
@@ -97,16 +131,16 @@
             <div class="col-lg-4 col-md-10">
                 <div class="card glass-card p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="m-0 fw-bold">Playlist</h6>
-                        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="document.getElementById('file-upload').click()">
-                            <i class="bi bi-plus-circle me-1"></i> Ajouter
+                        <h6 class="m-0 fw-bold">MA PLAYLIST</h6>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="document.getElementById('file-upload').click()">
+                            <i class="bi bi-plus-lg me-1"></i> AJOUTER
                         </button>
                         <input id="file-upload" type="file" accept="audio/*" multiple style="display:none;">
                     </div>
                     <div class="playlist-content" id="playlist">
-                        <div class="text-center p-5 opacity-25 small">
+                        <div class="text-center p-5 opacity-50">
                             <i class="bi bi-music-note-list fs-1 d-block mb-2"></i>
-                            Aucune piste
+                            LISTE VIDE
                         </div>
                     </div>
                 </div>
@@ -156,7 +190,7 @@
             const file = playlist[index];
             if (audio.src) URL.revokeObjectURL(audio.src);
             audio.src = URL.createObjectURL(file);
-            trackNameEl.textContent = file.name;
+            trackNameEl.textContent = file.name.toUpperCase();
             audio.volume = volumeSlider.value;
             renderPlaylist();
             audio.load();
@@ -178,9 +212,8 @@
             const val = e.target.value;
             audio.volume = val;
             const percent = Math.round(val * 100);
-            volLabel.textContent = "VOLUME : " + percent + "%";
-            volLabel.className = percent === 0 ? "small fw-bold mt-2 text-danger" : "small fw-bold mt-2 text-success";
-            document.getElementById('vol-icon').className = val == 0 ? "bi bi-volume-mute-fill" : "bi bi-volume-up-fill";
+            volLabel.textContent = percent === 0 ? "SON COUPÉ (0%)" : "VOLUME : " + percent + "%";
+            volLabel.className = percent === 0 ? "text-center small fw-bold mt-2 text-danger" : "text-center small fw-bold mt-2 text-success";
         };
 
         audio.ontimeupdate = () => { 
